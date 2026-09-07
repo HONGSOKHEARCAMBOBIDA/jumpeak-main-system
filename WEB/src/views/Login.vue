@@ -19,14 +19,13 @@
             label-position="top"
           >
             <AppInput
-              v-model="form.phone"
-              label="លេខទូរសព្ទ"
+              v-model="form.email"
+              label="អុីម៉ែល"
               prop="phone"
-              placeholder="បញ្ចូលលេខទូរសព្ទ"
-              prefix-icon="Phone"
+              placeholder="បញ្ចូលអុីម៉ែល"
+              prefix-icon="Message"
               clearable="true"
               autofocus="true"
-              type="number"
             >
             </AppInput>
             <AppInput
@@ -49,40 +48,16 @@
             </AppButton>
           </el-form>
         </template>
-        <template #qr>
-          <div class="qr-scanner-wrap">
-            <div v-if="!scanning && !loading" class="qr-start">
-              <p class="qr-hint">ចុចប៊ូតុងខាងក្រោម ដើម្បីស្កែន QR Code</p>
-              <AppButton type="primary" size="large" @click="startScanner">
-                បើកកាមេរ៉ាស្កែន
-              </AppButton>
-            </div>
-            <div v-show="scanning" class="qr-viewport">
-              <div id="qr-reader"></div>
-              <p class="qr-hint">ដាក់ QR Code នៅក្នុងប្រអប់ស្កែន</p>
-              <AppButton type="primary" size="large" @click="stopScanner">
-                បោះបង់
-              </AppButton>
-            </div>
-
-            <div v-if="loading" class="qr-loading">
-              <el-icon class="is-loading" size="32"><Loading /></el-icon>
-              <p>កំពុងចូលប្រព័ន្ធ...</p>
-            </div>
-          </div>
-        </template>
       </AppTabs>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, watch, onUnmounted, nextTick } from "vue";
+import { ref, reactive, } from "vue";
 import { useRouter } from "vue-router";
-import { ElMessage } from "element-plus";
 import { useAuthStore } from "../stores/auth";
-import { login, loginByQr } from "../api/services";
-import { Html5Qrcode } from "html5-qrcode";
+import { login, } from "../api/services";
 import AppButton from "../../components/AppButton.vue";
 import AppInput from "../../components/AppInput.vue";
 import AppTabs from "../../components/AppTabs.vue";
@@ -92,40 +67,14 @@ const router = useRouter();
 const auth = useAuthStore();
 const formRef = ref();
 const loading = ref(false);
-const activeTab = ref("phone");
-const scanning = ref(false);
-let html5QrCode = null;
 
-async function startScanner() {
-  scanning.value = true;
-  await nextTick(); // wait for #qr-reader to mount
 
-  html5QrCode = new Html5Qrcode("qr-reader");
-  try {
-    await html5QrCode.start(
-      { facingMode: "environment" }, // rear camera
-      { fps: 10, qrbox: { width: 180, height: 180 } },
-      (decodedText) => {
-        stopScanner();
-        handleQrLogin(decodedText); // auto-login on scan
-      },
-      () => {}, // ignore per-frame errors
-    );
-  } catch (e) {
-    ElMessage.error("មិនអាចបើកកាមេរ៉ាបាន: " + e);
-    scanning.value = false;
-  }
-}
-
-function stopScanner() {
-  scanning.value = false;
-  html5QrCode?.stop().catch(() => {});
-  html5QrCode = null;
-}
-
-const form = reactive({ phone: "", password: "" });
+const form = reactive({ 
+  email: "", 
+  password: ""
+ });
 const rules = {
-  phone: [{ required: true, message: "សូមបញ្ចូលលេខទូរសព្ទ", trigger: "blur" }],
+  email: [{ required: true, message: "សូមបញ្ចូលអុីម៉ែល", trigger: "blur" }],
   password: [
     { required: true, message: "សូមបញ្ជូលពាក្យសម្ងាត់", trigger: "blur" },
   ],
@@ -146,24 +95,6 @@ async function handleLogin() {
   }
 }
 
-async function handleQrLogin(token) {
-  if (!token) return ElMessage.warning("QR token មិនត្រឹមត្រូវ");
-  loading.value = true;
-  try {
-    const res = await loginByQr({ qr_token: token });
-    auth.setAuth(res.data.data);
-    router.push("/dashboard");
-  } catch (e) {
-    ElMessage.error(e.response?.data?.message || "QR login failed");
-  } finally {
-    loading.value = false;
-  }
-}
-
-onUnmounted(() => stopScanner());
-watch(activeTab, (tab) => {
-  if (tab !== "qr") stopScanner();
-});
 </script>
 
 <style scoped>

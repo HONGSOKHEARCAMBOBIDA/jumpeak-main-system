@@ -2,13 +2,15 @@
   <div class="dashboard">
     <div class="dash-grid">
       <el-card class="dash-card">
-        <template #header><span class="card-title">សកម្មភាពរហ័ស</span></template>
+        <template #header
+          ><span class="card-title">សកម្មភាពរហ័ស</span></template
+        >
         <div class="action-grid">
           <div class="action-btn" @click="$router.push('/users')">
             <el-icon size="26" color="#409eff">
               <UserFilled />
             </el-icon>
-            <span>បុគ្គលិក</span>
+            <span>អ្នកប្រើប្រាស់</span>
           </div>
           <div class="action-btn" @click="$router.push('/attendance')">
             <el-icon size="26" color="#67c23a">
@@ -28,180 +30,26 @@
             </el-icon>
             <span>សុំច្បាប់</span>
           </div>
-          <div class="action-btn" @click="$router.push('/createattendance')">
+          <div class="action-btn" @click="$router.push('/company')">
             <el-icon size="26" color="#e6a23c">
-              <Camera />
+              <School />
             </el-icon>
-            <span>កត់ត្រាវត្តមាន</span>
+            <span>ក្រុមហ៑ុន</span>
           </div>
           <div class="action-btn" @click="$router.push('/company')">
             <el-icon size="26" color="#f56c6c">
               <OfficeBuilding />
             </el-icon>
-            <span>ក្រុមហ៑ុន</span>
+            <span>សាខាតាមក្រុមហ៑ុន</span>
           </div>
         </div>
-      </el-card>
-
-      <el-card class="dash-card">
-        <template #header>
-          <div class="">
-            <AppFilterBar :fields="[
-              { slot: 'date', span: 10 },
-              { slot: 'company', span: 10 }
-            ]">
-              <template #date>
-                <el-date-picker v-model="filters.check_date" type="date" placeholder="ជ្រេីសរេីសថ្ងៃទី"
-                  value-format="YYYY-MM-DD" clearable @change="loadAttendance" style="width: 100%" size="large" />
-              </template>
-              <template #company>
-                <el-select v-model="filters.company_id" placeholder="ក្រុមហ៑ុន" clearable style="width: 100%"
-                  size="large" @change="loadAttendance">
-                  <el-option v-for="company in companys" :key="company.id" :label="company.name" :value="company.id" />
-                </el-select>
-              </template>
-            </AppFilterBar>
-          </div>
-        </template>
-        <el-card>
-          <AppTable :data="recentAttendance" :loading="loading" v-model:current-page="page" v-model:page-size="pageSize"
-            :total="total" @page-change="loadAttendance()" :columns="[
-              { prop: 'name', label: 'ឈ្មោះ', minWidth: 110 },
-              { prop: 'gender_string', label: 'ភេទ', minWidth: 90 },
-              { prop: 'role_name', label: 'តួនាទី', minWidth: 110 },
-              { prop: 'company_name', label: 'ក្រុមហ៑ុន', minWidth: 130 },
-              { prop: 'check_date', label: 'ថ្ងៃស្កែន', minWidth: 120 },
-              { label: 'ស្ថានភាព', slot: 'status', width: 100 },
-            ]">
-            <template #status="{ row }">
-              <el-tag :type="row.status === 'COMPLETE' ? 'success' : 'warning'" size="small">
-                {{ row.status }}
-              </el-tag>
-            </template>
-
-            <template #actions="{ row }">
-              <div class="detail-action">
-                <el-badge :value="row.attendance_record?.length || 0"
-                  :type="row.status === 'COMPLETE' ? 'success' : 'warning'">
-                  <el-button size="large" icon="List" circle @click="viewRecords(row)" />
-                </el-badge>
-              </div>
-            </template>
-          </AppTable>
-        </el-card>
-
-        <AppDialog v-model="recordsDialog" :title="`លម្អិត — ${selectedRow?.name}`" width="60%">
-          <AppTable :data="selectedRow?.attendance_record || []" :total="selectedRow?.attendance_record.length || []"
-            :columns="[
-              { prop: 'day_string', label: 'ថ្ងៃ', width: 100 },
-              { prop: 'type_string', label: 'ប្រភេទ', width: 150 },
-              { prop: 'check_time', label: 'ម៉ោងបានស្កែន', width: 150 },
-              { prop: 'scheduled_time', label: 'ម៉ោងត្រូវស្កែន', width: 110 },
-              { prop: 'time_diff', label: 'យឺត/មុនម៉ោង', width: 150 },
-              { label: 'ស្ថានភាព', slot: 'attendance_type_name', width: 100 },
-              { label: 'ទីតាំងស្កែន', slot: 'check_location' },
-              { label: 'មេីលទីតាំង', slot: 'view_location' },
-              { prop: 'reason', label: 'មូលហេតុ', width: 120 },
-            ]">
-            <template #attendance_type_name="{ row }">
-              <el-tag size="small" :type="getAttendTypeTag(row.attendance_type)">
-                {{ row.attendance_type_name || "—" }}
-              </el-tag>
-            </template>
-            <template #check_location="{ row }">
-              <el-icon size="large" :color="row.inzone ? '#67c23a' : '#f56c6c'">
-                <component :is="row.inzone ? 'CircleCheckFilled' : 'CircleCloseFilled'" />
-              </el-icon>
-            </template>
-            <template #view_location="{ row }">
-              <el-icon size="large" :color="row.inzone ? '#67c23a' : '#f56c6c'" style="cursor: pointer"
-                @click="openLocation(row)">
-                <LocationInformation />
-              </el-icon>
-            </template>
-          </AppTable>
-        </AppDialog>
       </el-card>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, } from "vue";
-import { getAttendance, viewcompanyscan } from "../api/services";
-import { ElNotification } from "element-plus";
-import AppTable from "../../components/AppTable.vue";
-import AppDialog from "../../components/AppDialog.vue";
-import { LocationInformation } from "@element-plus/icons-vue";
-import AppFilterBar from "../../components/AppFilterBar.vue";
-const loading = ref(false);
-const recentAttendance = ref([]);
-const recordsDialog = ref(false);
-const selectedRow = ref(null);
-const page = ref(1);
-const pageSize = ref(10);
-const total = ref(0);
-const companys = ref([]);
-const filters = reactive({
-  check_date: null,
-  company_id: null
-});
-
-async function loadAttendance() {
-  loading.value = true;
-
-  try {
-    const params = {
-      page: page.value,
-      page_size: pageSize.value,
-      check_date: filters.check_date,
-      company_id: filters.company_id
-    };
-    const res = await getAttendance(params);
-    recentAttendance.value = res.data.data || [];
-    total.value = res.data.pagination?.totalCount || 0;
-  } catch (e) {
-    ElNotification({
-      title: "មានបញ្ហា",
-      message: e.response?.data?.error || e.message,
-    });
-  } finally {
-    loading.value = false;
-  }
-}
-
-async function fetchmanagecompany() {
-  loading.value = true;
-  try {
-    const res = await viewcompanyscan()
-    companys.value = res.data.data || [];
-  } catch (e) {
-    ElMessage.error("Failed to load managecompany");
-  } finally {
-    loading.value = false;
-  }
-}
-
-function openLocation(row) {
-  if (!row.latitdude || !row.longitude) {
-    return ElMessage.warning("មិនមានទីតាំងស្កែន");
-  }
-  const url = `https://www.google.com/maps?q=${row.latitdude},${row.longitude}`;
-  window.open(url, "_blank");
-}
-function getAttendTypeTag(type) {
-  const map = { 1: "success", 2: "info", 3: "warning", 4: "danger" };
-  return map[type] || "info";
-}
-function viewRecords(row) {
-  selectedRow.value = row;
-  recordsDialog.value = true;
-}
-onMounted(async () => {
-  // loadAttendance();
-  fetchmanagecompany()
-
-});
+import { ref, onMounted, reactive } from "vue";
 </script>
 
 <style scoped>
@@ -376,7 +224,6 @@ onMounted(async () => {
 }
 
 @media (max-width: 400px) {
-
   /* Very small screens: action buttons tighter */
   .action-btn {
     padding: 12px 6px;

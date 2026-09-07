@@ -5,8 +5,6 @@ export const login = (data) => api.post('/login', data)
 export const loginByQr = (data) => api.post('/loginbyqr', data)
 export const refreshToken = (data) => api.post('/refresh',{}, { withCredentials: true })
 
-
-
 // User
 export const getUsers = (params) => api.get('/view.user', { params })
 export const createUser = (data) => api.post('/add.user', data)
@@ -32,11 +30,14 @@ export const deleteBackup = (filename) => api.delete('delete.backup',{
   params: {file: filename},
 })
 
-
-
-
 // RoleHasPermission
 export const getrolehaspermission = (id) => api.get(`/view.role.has.permission/${id}`)
 export const addrolehaspermission = (data) => api.post('/add.role.has.permission',data)
 export const deleterolehaspermission = (data) => api.delete('/delete.role.has.permission',{data})
 export const editrole = (id,data) => api.put(`/edit.role/${id}`,data)
+
+// company
+
+export const getcompany = (params) => api.get(`/view.company`,{params})
+export const addcompany = (data) => api.post('/add.company',data)
+export const updatecompany = (id,data) => api.put(`/update.company/${id}`,data)

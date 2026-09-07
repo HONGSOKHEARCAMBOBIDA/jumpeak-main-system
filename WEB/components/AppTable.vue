@@ -1,7 +1,7 @@
 <template>
   <div
     class="app-table"
-    :style="{ '--brand-color': companyStore.color || '#4589ce' }"
+    :style="{ '--brand-color': '#4589ce' }"
   >
     <el-table
       v-if="!isMobile"
@@ -21,7 +21,15 @@
         :label="indexLabel"
         width="70"
       />
-
+<el-table-column
+  v-if="expandable"
+  type="expand"
+  width="50"
+>
+  <template #default="scope">
+    <slot name="expand" v-bind="scope" />
+  </template>
+</el-table-column>
       <el-table-column
         v-for="col in columns"
         :key="col.prop || col.label"
@@ -88,9 +96,6 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from "vue";
-// import { useCompanyStore } from '../stores/company'
-import { useCompanyStore } from "../src/stores/company";
-const companyStore = useCompanyStore();
 const props = defineProps({
   data: { type: Array, default: () => [] },
   columns: { type: Array, required: true },
@@ -106,6 +111,10 @@ const props = defineProps({
   total: { type: Number, default: 0 },
   tableProps: { type: Object, default: () => ({}) },
   selectable: { type: Boolean, default: false },
+   expandable: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const emit = defineEmits([
@@ -130,7 +139,6 @@ function onResize() {
 }
 onMounted(() => {
   window.addEventListener("resize", onResize);
-  companyStore.fetchColor();
 });
 onUnmounted(() => window.removeEventListener("resize", onResize));
 

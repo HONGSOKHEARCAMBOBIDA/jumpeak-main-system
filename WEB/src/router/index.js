@@ -25,50 +25,6 @@ const routes = [
         },
       },
       {
-        path: "company",
-        name: "Company",
-        component: () => import("../views/Company.vue"),
-        meta: {
-          title: "ក្រុមហ៑ុន",
-          icon: "OfficeBuilding",
-          short: "ក្រុមហ៑ុន",
-          showInNav: true,
-        },
-      },
-      {
-        path: "users",
-        name: "Users",
-        component: () => import("../views/Users.vue"),
-        meta: {
-          title: "បុគ្គលិក",
-          icon: "User",
-          short: "បុគ្គលិក",
-          showInNav: true,
-        },
-      },
-      {
-        path: "leavetype",
-        name: "LeaveType",
-        component: () => import("../views/LeaveType.vue"),
-        meta: {
-          title: "ប្រភេទច្បាប់",
-          icon: "List",
-          short: "ប្រភេទច្បាប់",
-          showInNav: false,
-        }
-      },
-      {
-        path: "leaverequest",
-        name: "LeaveRequest",
-        component: () => import("../views/LeaveRequest.vue"),
-        meta: {
-          title: "សុំច្បាប់",
-          icon: "Promotion",
-          short: "សុំច្បាប់",
-          showInNav: false,
-        }
-      },
-      {
         path: 'role',
         name: 'Role',
         component: () => import("../views/Role.vue"),
@@ -79,46 +35,6 @@ const routes = [
           showInNav: true,
           permission: "add.role.has.permission",
         }
-      },
-      {
-        path: "attendance",
-        name: "Attendance",
-        component: () => import("../views/Attendance.vue"),
-        meta: {
-          title: "វត្តមាន",
-          icon: "Clock",
-          short: "វត្តមាន",
-          showInNav: true,
-        },
-      },
-      {
-        path: "payroll",
-        name: "Payroll",
-        component: () => import("../views/Payroll.vue"),
-        meta: {
-          title: "បេីកប្រាក់ខែ",
-          icon: "Money",
-          short: "បេីកប្រាក់ខែ",
-          permission: "add.payroll",
-          showInNav: true,
-        },
-      },
-      {
-        path: "payrolllist",
-        name: "Payrolllist",
-        component: () => import("../views/PayrollList.vue"),
-        meta: {
-          title: "របាយការណ៍បើកប្រាក់ខែ",
-          icon: "Money",
-          short: "របាយការណ៍បើកប្រាក់ខែ",
-          showInNav: true,
-        },
-      },
-      {
-        path: "createattendance",
-        name: "CreateAttendance",
-        component: () => import("../views/CreateAttendance.vue"),
-        meta: { title: "បង្កេីតវត្តមាន",showInNav: false }, // no showInNav -> hidden from sidebar
       },
       {
         path: "profile",
@@ -142,6 +58,11 @@ const routes = [
           permission: "view.backup",
           showInNav: true,
         },
+      },
+      {
+        path: "company",
+        name: "Company",
+        component: () => import("../views/company.vue"),
       },
       {
         path: "/:pathMatch(.*)*",

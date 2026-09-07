@@ -1,8 +1,19 @@
 package permission
 
 const (
+	// user
+	AddUser        = "add.user"
+	ViewUser       = "view.user"
+	EditUser       = "edit.user"
+	ChangePassword = "change.password"
+
+	// RoleHasPermission
+	ViewRoleHasPermission   = "view.role.has.permission"
+	AddRoleHasPermission    = "add.role.has.permission"
+	DeleteRoleHasPermission = "delete.role.has.permission"
+
 	// Company
-	AddCompany  = "add.company"
-	ViewCompany = "view.company"
-	EditCompany = "edit.company"
+	ViewCompany   = "view.company"
+	AddCompany    = "add.company"
+	UpdateCompany = "update.company"
 )

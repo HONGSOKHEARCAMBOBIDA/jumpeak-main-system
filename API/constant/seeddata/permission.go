@@ -1,0 +1,42 @@
+package seeddata
+
+import "mysql/model"
+
+var Permissions = []model.Permission{
+	{
+		Name:        "add.user",
+		DisplayName: "Add User",
+	},
+	{
+		Name:        "view.user",
+		DisplayName: "View User",
+	},
+	{
+		Name:        "edit.user",
+		DisplayName: "Edit User",
+	},
+	{
+		Name:        "view.role.has.permission",
+		DisplayName: "view.role.has.permission",
+	},
+	{
+		Name:        "add.role.has.permission",
+		DisplayName: "add.role.has.permission",
+	},
+	{
+		Name:        "delete.role.has.permission",
+		DisplayName: "delete.role.has.permission",
+	},
+	{
+		Name:        "view.company",
+		DisplayName: "view.company",
+	},
+	{
+		Name:        "add.company",
+		DisplayName: "add.company",
+	},
+	{
+		Name:        "update.company",
+		DisplayName: "update.company",
+	},
+}

@@ -1,25 +1,39 @@
 package model
 
-import "mysql/model/base"
+import (
+	"mysql/model/base"
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type UserManageBranch string
+
+const (
+	UserManageBranchOne      UserManageBranch = "ONE"
+	UserManageBranchMultiple UserManageBranch = "MULTIPLE"
+	UserManageBranchAll      UserManageBranch = "ALL"
+)
+
+type UserStatus string
+
+const (
+	UserStatusActive   UserStatus = "ACTIVE"
+	UserStatusDisabled UserStatus = "DISABLED"
+)
 
 type User struct {
 	base.ModelBase
-	PhoneHash      string `json:"phone_hash" gorm:"column:phone_hash"`
-	PhoneEncript   string `json:"phone_encrypted" gorm:"column:phone_encrypted"`
-	PasswordHash   string `json:"password_hash" gorm:"column:password_hash"`
-	RoleID         int    `json:"role_id" gorm:"column:role_id"`
-	Role           Role
-	IsActive       bool   `json:"is_active" gorm:"column:is_active"`
-	Name           string `json:"name" gorm:"column:name"`
-	Gender         int    `json:"gender" gorm:"column:gender"`
-	BaseSalary     string `json:"base_salary" gorm:"column:base_salary"`
-	CompanyID      int    `json:"company_id" gorm:"column:company_id"`
-	QrToken        string `json:"qr_token" gorm:"column:qr_token"`
-	IsVerify       bool   `json:"is_verify" gorm:"column:is_verify"`
-	QrTokenEncript string `json:"qr_token_encript" gorm:"column:qr_token_encript"`
-	ManageCompany  int    `json:"manage_company" gorm:"column:manage_company"`
-}
-
-func (User) TableName() string {
-	return "user"
+	CompanyID    uint64           `gorm:"not null;index;uniqueIndex:uq_user_email" json:"company_id"`
+	BranchID     *uint64          `gorm:"index" json:"branch_id,omitempty"`
+	Name         string           `gorm:"type:varchar(120);not null" json:"name"`
+	Email        string           `gorm:"type:varchar(190);not null;uniqueIndex:uq_user_email" json:"email"`
+	PasswordHash string           `gorm:"type:varchar(255);not null" json:"password_hash"`
+	RoleID       int64            `gorm:"not null;index" json:"role_id"`
+	ManageBranch UserManageBranch `gorm:"type:enum('ONE','MULTIPLE','ALL');not null;default:ONE" json:"manage_branch"`
+	Status       UserStatus       `gorm:"type:enum('ACTIVE','DISABLED');not null;default:ACTIVE" json:"status"`
+	CreatedAt    time.Time        `gorm:"not null;autoCreateTime" json:"created_at"`
+	UpdatedAt    time.Time        `gorm:"not null;autoUpdateTime" json:"updated_at"`
+	DeletedAt    gorm.DeletedAt   `gorm:"index" json:"deleted_at,omitempty"`
+	Role         Role
 }

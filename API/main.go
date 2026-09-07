@@ -5,6 +5,8 @@ import (
 	"mysql/config"
 	"mysql/model"
 	"mysql/routes"
+
+	//"mysql/seed"
 	"mysql/utils"
 	"time"
 
@@ -16,6 +18,7 @@ func main() {
 	// Initialize database connection
 	config.LoadEnv()
 	config.ConnectDatabase()
+	//seed.SeedPermissions(config.DB)
 
 	go func() {
 		for {
