@@ -1,0 +1,65 @@
+# =========================
+# Environment / Secrets
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Go / API
+# =========================
+API/.env
+API/tmp/
+API/temp/
+API/logs/
+API/*.log
+
+# Go build
+API/app
+API/main
+API/server
+API/bin/
+API/build/
+
+# Go test / coverage
+*.test
+coverage.out
+coverage.html
+
+# =========================
+# Vue / WEB
+# =========================
+WEB/node_modules/
+WEB/dist/
+WEB/.vite/
+WEB/.cache/
+WEB/.nuxt/
+WEB/.output/
+
+# npm / yarn / pnpm logs
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# =========================
+# IDE
+# =========================
+.vscode/
+.idea/
+*.iml
+
+# =========================
+# OS
+# =========================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# =========================
+# Temporary files
+# =========================
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
