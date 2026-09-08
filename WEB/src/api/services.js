@@ -46,3 +46,10 @@ export const updatecompany = (id,data) => api.put(`/update.company/${id}`,data)
 // branch
 export const addbranch = (data) => api.post('/add.Branch',data)
 export const updatebranch = (id,data) => api.put(`/update.Branch/${id}`,data)
+
+
+// Customer
+
+export const getcustomer = (params) => api.get(`/view.Customer`,{params})
+export const addcustomer = (data) => api.post('/add.Customer',data)
+export const updatecustomer = (id,data) => api.put(`/update.Customer/${id}`,data)

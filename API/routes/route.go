@@ -14,6 +14,7 @@ func SetupRoutes(r *gin.Engine) {
 	rolehaspermissioncontroller := controller.NewRoleHasPermissionController()
 	companycontroller := controller.NewCompanyController()
 	branchcontroller := controller.NewBranchController()
+	customercontroller := controller.NewCustomerController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -44,5 +45,10 @@ func SetupRoutes(r *gin.Engine) {
 		// User
 		auth.POST(route.AddUser, middleware.PermissionMiddleware(permission.AddUser), authcontroller.Create)
 		auth.PUT(route.EditUser, middleware.PermissionMiddleware(permission.EditUser), authcontroller.Update)
+
+		// Customer
+		auth.POST(route.AddCustomer, middleware.PermissionMiddleware(permission.AddCustomer), customercontroller.Create)
+		auth.GET(route.ViewCustomer, middleware.PermissionMiddleware(permission.ViewCustomer), customercontroller.Get)
+		auth.PUT(route.UpdateCustomer, middleware.PermissionMiddleware(permission.UpdateCustomer), customercontroller.Update)
 	}
 }

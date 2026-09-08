@@ -51,4 +51,16 @@ var Permissions = []model.Permission{
 		Name:        "update.Branch",
 		DisplayName: "update.Branch",
 	},
+	{
+		Name:        "view.Customer",
+		DisplayName: "view.Customer",
+	},
+	{
+		Name:        "add.Customer",
+		DisplayName: "add.Customer",
+	},
+	{
+		Name:        "update.Customer",
+		DisplayName: "update.Customer",
+	},
 }

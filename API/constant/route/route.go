@@ -32,4 +32,9 @@ const (
 	ViewBranch   = "view.Branch"
 	AddBranch    = "add.Branch"
 	UpdateBranch = "update.Branch/:id"
+
+	// Customer
+	ViewCustomer   = "view.Customer"
+	AddCustomer    = "add.Customer"
+	UpdateCustomer = "update.Customer/:id"
 )

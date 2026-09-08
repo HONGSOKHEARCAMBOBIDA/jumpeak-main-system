@@ -27,8 +27,8 @@ type Customer struct {
 	CreditLimitEnforced bool           `gorm:"not null;default:false" json:"credit_limit_enforced"`
 	CurrentOutstanding  float64        `gorm:"type:decimal(18,2);not null;default:0.00" json:"current_outstanding"`
 	Status              CustomerStatus `gorm:"type:enum('ACTIVE','INACTIVE','BLACKLISTED');not null;default:ACTIVE" json:"status"`
-	CreatedBy           *uint64        `gorm:"index" json:"created_by,omitempty"`
-	UpdatedBy           *uint64        `gorm:"index" json:"updated_by,omitempty"`
+	CreatedBy           *int           `gorm:"index" json:"created_by,omitempty"`
+	UpdatedBy           *int           `gorm:"index" json:"updated_by,omitempty"`
 	CreatedAt           time.Time      `gorm:"not null;autoCreateTime" json:"created_at"`
 	UpdatedAt           time.Time      `gorm:"not null;autoUpdateTime" json:"updated_at"`
 	DeletedAt           gorm.DeletedAt `gorm:"index" json:"deleted_at,omitempty"`

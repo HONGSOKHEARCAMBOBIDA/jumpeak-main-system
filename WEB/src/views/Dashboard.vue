@@ -6,11 +6,11 @@
           ><span class="card-title">សកម្មភាពរហ័ស</span></template
         >
         <div class="action-grid">
-          <div class="action-btn" @click="$router.push('/users')">
+          <div class="action-btn" @click="$router.push('/customer')">
             <el-icon size="26" color="#409eff">
               <UserFilled />
             </el-icon>
-            <span>អ្នកប្រើប្រាស់</span>
+            <span>អតិថិជន</span>
           </div>
           <div class="action-btn" @click="$router.push('/attendance')">
             <el-icon size="26" color="#67c23a">
