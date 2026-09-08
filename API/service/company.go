@@ -17,7 +17,7 @@ import (
 
 type CompanyService interface {
 	Create(ctx context.Context, input request.CompanyRequestCreate) error
-	Get(ctx context.Context, pf request.Pagination, filter map[string]string) ([]response.CompanyResponse, *model.PaginationMetadata, error)
+	Get(ctx context.Context, userID int, pf request.Pagination, filter map[string]string) ([]response.CompanyResponse, *model.PaginationMetadata, error)
 	Update(ctx context.Context, id int, input request.CompanyRequestUpdate) error
 }
 
@@ -71,11 +71,14 @@ func (s *companyservice) Update(ctx context.Context, id int, input request.Compa
 	return err
 }
 
-func (s *companyservice) Get(ctx context.Context, pf request.Pagination, filter map[string]string) ([]response.CompanyResponse, *model.PaginationMetadata, error) {
+func (s *companyservice) Get(ctx context.Context, userID int, pf request.Pagination, filter map[string]string) ([]response.CompanyResponse, *model.PaginationMetadata, error) {
 	helper.NormalizePagination(&pf)
 	var companies []response.CompanyResponse
 	var total int64
-
+	var user model.User
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
+		return nil, nil, err
+	}
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("companies c")
@@ -104,6 +107,8 @@ func (s *companyservice) Get(ctx context.Context, pf request.Pagination, filter 
 		c.status AS status
 	`)
 
+	dataQuery = helper.CompanyFilter(dataQuery, s.db, user.Role, user)
+
 	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Scan(&companies).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch companies: %w", err)
 	}
@@ -114,7 +119,7 @@ func (s *companyservice) Get(ctx context.Context, pf request.Pagination, filter 
 	}
 
 	var branches []response.BranchResponse
-	if err := s.db.WithContext(ctx).Table("branches b").
+	branchquery := s.db.WithContext(ctx).Table("branches b").
 		Where("b.company_id IN ?", companyIDs).
 		Select(`
 			b.id AS id,
@@ -123,8 +128,70 @@ func (s *companyservice) Get(ctx context.Context, pf request.Pagination, filter 
 			b.code AS code,
 			b.address AS address,
 			b.status AS status
-		`).Scan(&branches).Error; err != nil {
-		return nil, nil, fmt.Errorf("fetch branches: %w", err)
+		`)
+	branchquery = helper.ApplyAccessFilter(branchquery, s.db, user.Role, user)
+	if err := branchquery.Order("id DESC").Scan(&branches).Error; err != nil {
+		return nil, nil, err
+	}
+
+	branchIDs := make([]uint64, 0, len(branches))
+	for _, b := range branches {
+		branchIDs = append(branchIDs, uint64(b.ID))
+	}
+
+	var users []response.UserResponse
+	userquery := s.db.WithContext(ctx).Table("users u").
+		Joins("LEFT JOIN role r ON r.id = u.role_id").
+		Where("u.branch_id IN ?", branchIDs).
+		Select(`
+		u.id AS id,
+		u.branch_id AS branch_id,
+		u.name AS name,
+		u.email AS email,
+		r.id AS role_id,
+		r.name AS role_name,
+		r.display_name AS role_display_name,
+		u.manage_branch AS manage_branch,
+		u.status AS status
+	`)
+
+	userquery = helper.UserFilter(userquery, s.db, user.Role, user)
+
+	if err := userquery.Scan(&users).Error; err != nil {
+		return nil, nil, err
+	}
+
+	userIDs := make([]int, len(users))
+	for i, a := range users {
+		userIDs[i] = a.ID
+	}
+
+	var userbranch []response.ManageBranchID
+	if err := s.db.WithContext(ctx).Table("user_branches ub").
+		Select(`
+		ub.id AS id,
+		ub.user_id AS user_id,
+		ub.branch_id AS branch_id
+	`).Where("ub.user_id IN ?", userIDs).Scan(&userbranch).Error; err != nil {
+		return nil, nil, fmt.Errorf("fetch user branch: %w", err)
+	}
+
+	subbranch := make(map[uint64][]response.ManageBranchID, len(users))
+	for _, s := range userbranch {
+		subbranch[uint64(s.UserID)] = append(subbranch[uint64(s.UserID)], s)
+	}
+
+	for i := range users {
+		users[i].ManageBranchID = subbranch[uint64(users[i].ID)]
+	}
+
+	userbybranch := make(map[uint64][]response.UserResponse, len(branches))
+	for _, u := range users {
+		userbybranch[*u.BranchID] = append(userbybranch[*u.BranchID], u)
+	}
+
+	for i := range branches {
+		branches[i].UserResponse = userbybranch[uint64(branches[i].ID)]
 	}
 
 	branchesByCompany := make(map[uint64][]response.BranchResponse, len(companies))

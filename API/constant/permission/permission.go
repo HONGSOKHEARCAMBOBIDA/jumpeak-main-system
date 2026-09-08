@@ -16,4 +16,9 @@ const (
 	ViewCompany   = "view.company"
 	AddCompany    = "add.company"
 	UpdateCompany = "update.company"
+
+	// Branch
+	ViewBranch   = "view.Branch"
+	AddBranch    = "add.Branch"
+	UpdateBranch = "update.Branch"
 )

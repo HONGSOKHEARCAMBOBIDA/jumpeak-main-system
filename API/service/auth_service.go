@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mysql/config"
+	"mysql/constant/apperror"
 	"mysql/helper"
 	"mysql/model"
 	"mysql/request"
@@ -14,6 +15,7 @@ import (
 	"mysql/utils"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -27,6 +29,8 @@ type AuthService interface {
 	RefreshToken(refreshToken string, c *gin.Context) (*response.AuthResponse, error)
 	GetUserData(ctx context.Context, id int) (response.UserDataResponse, error)
 	GetRole(ctx context.Context, id int) ([]model.Role, error)
+	Create(ctx context.Context, input request.UserRequestCreate) error
+	Update(ctx context.Context, id int, input request.UserRequestUpdate) error
 }
 
 type authservice struct {
@@ -43,6 +47,10 @@ var requiredPermissions = []string{
 	"add.role.has.permission",
 	"add.company",
 	"update.company",
+	"add.Branch",
+	"update.Branch",
+	"add.user",
+	"edit.user",
 }
 
 func (s *authservice) GetRole(ctx context.Context, id int) ([]model.Role, error) {
@@ -291,4 +299,98 @@ func (s *authservice) GetUserData(ctx context.Context, id int) (response.UserDat
 	userdata.Permissions = permissions
 
 	return userdata, nil
+}
+
+func (s *authservice) Create(ctx context.Context, input request.UserRequestCreate) error {
+	ctx, cancel := context.WithTimeout(ctx, utils.DefaultQueryTimeout)
+	defer cancel()
+
+	var branch model.Branch
+	if err := s.db.WithContext(ctx).First(&branch, input.BranchID).Error; err != nil {
+		return err
+	}
+
+	email := helper.GenerateEmail(input.Name, 168)
+	passwordHash := utils.HasPassword("12345678")
+
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		newdata := model.User{
+			CompanyID:    branch.CompanyID,
+			BranchID:     input.BranchID,
+			Name:         strings.TrimSpace(input.Name),
+			Email:        email,
+			PasswordHash: passwordHash,
+			RoleID:       input.RoleID,
+			ManageBranch: input.ManageBranch,
+			Status:       model.UserStatusActive,
+		}
+
+		if err := tx.Create(&newdata).Error; err != nil {
+			return err
+		}
+
+		if input.ManageBranch == model.UserManageBranchMultiple &&
+			input.BranchIDs != nil && len(*input.BranchIDs) != 0 {
+			for i := range *input.BranchIDs {
+				userbranch := model.UserBranch{
+					UserID:   uint64(newdata.ID),
+					BranchID: (*input.BranchIDs)[i],
+				}
+				if err := tx.Create(&userbranch).Error; err != nil {
+					return err
+				}
+			}
+		}
+
+		return nil
+	})
+
+	return err
+}
+
+func (s *authservice) Update(ctx context.Context, id int, input request.UserRequestUpdate) error {
+	ctx, cancel := context.WithTimeout(ctx, utils.DefaultQueryTimeout)
+	defer cancel()
+	var branch model.Branch
+	if err := s.db.WithContext(ctx).First(&branch, input.BranchID).Error; err != nil {
+		return err
+	}
+	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		var data model.User
+		if err := tx.Where("id = ?", id).First(&data).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return apperror.New(apperror.CodeNotFound, "classcurriculumn not found", nil)
+			}
+			return apperror.New(apperror.CodeInternal, "failed to fetch classcurriculumn", nil)
+		}
+		data.CompanyID = branch.CompanyID
+		data.BranchID = input.BranchID
+		data.Name = input.Name
+		data.RoleID = input.RoleID
+		data.ManageBranch = input.ManageBranch
+		data.Status = input.Status
+		if err := tx.Save(&data).Error; err != nil {
+			return apperror.New(apperror.CodeInternal, "failed to update student", nil)
+		}
+		if input.ManageBranch != model.UserManageBranchMultiple {
+			if err := tx.Where("user_id = ?", id).Delete(&model.UserBranch{}).Error; err != nil {
+				return err
+			}
+		} else if input.ManageBranch == model.UserManageBranchMultiple {
+			if err := tx.Where("user_id =?", id).Delete(&model.UserBranch{}).Error; err != nil {
+				return err
+			}
+			for i := range *input.BranchIDs {
+				userbranch := model.UserBranch{
+					UserID:   uint64(id),
+					BranchID: (*input.BranchIDs)[i],
+				}
+				if err := tx.Create(&userbranch).Error; err != nil {
+					return err
+				}
+			}
+		}
+		return nil
+	})
+	return err
 }

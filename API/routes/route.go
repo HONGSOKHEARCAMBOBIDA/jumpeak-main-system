@@ -13,6 +13,7 @@ func SetupRoutes(r *gin.Engine) {
 	authcontroller := controller.NewAuthController()
 	rolehaspermissioncontroller := controller.NewRoleHasPermissionController()
 	companycontroller := controller.NewCompanyController()
+	branchcontroller := controller.NewBranchController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -35,5 +36,13 @@ func SetupRoutes(r *gin.Engine) {
 		auth.GET(route.ViewCompany, middleware.PermissionMiddleware(permission.ViewCompany), companycontroller.Get)
 		auth.POST(route.AddCompany, middleware.PermissionMiddleware(permission.AddCompany), companycontroller.Create)
 		auth.PUT(route.UpdateCompany, middleware.PermissionMiddleware(permission.UpdateCompany), companycontroller.Update)
+
+		// Branch
+		auth.POST(route.AddBranch, middleware.PermissionMiddleware(permission.AddBranch), branchcontroller.Create)
+		auth.PUT(route.UpdateBranch, middleware.PermissionMiddleware(permission.UpdateBranch), branchcontroller.Update)
+
+		// User
+		auth.POST(route.AddUser, middleware.PermissionMiddleware(permission.AddUser), authcontroller.Create)
+		auth.PUT(route.EditUser, middleware.PermissionMiddleware(permission.EditUser), authcontroller.Update)
 	}
 }

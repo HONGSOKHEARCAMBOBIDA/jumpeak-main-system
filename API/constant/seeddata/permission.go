@@ -39,4 +39,16 @@ var Permissions = []model.Permission{
 		Name:        "update.company",
 		DisplayName: "update.company",
 	},
+	{
+		Name:        "view.Branch",
+		DisplayName: "view.Branch",
+	},
+	{
+		Name:        "add.Branch",
+		DisplayName: "add.Branch",
+	},
+	{
+		Name:        "update.Branch",
+		DisplayName: "update.Branch",
+	},
 }

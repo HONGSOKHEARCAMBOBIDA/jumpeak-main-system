@@ -11,7 +11,7 @@ const (
 	ViewUserData   = "view.user.data"
 	AddUser        = "add.user"
 	ViewUser       = "view.user"
-	EditUser       = "edit.user"
+	EditUser       = "edit.user/:id"
 	ChangePassword = "change.password"
 
 	// RoleHasPermission
@@ -27,4 +27,9 @@ const (
 	ViewCompany   = "view.company"
 	AddCompany    = "add.company"
 	UpdateCompany = "update.company/:id"
+
+	// Branch
+	ViewBranch   = "view.Branch"
+	AddBranch    = "add.Branch"
+	UpdateBranch = "update.Branch/:id"
 )

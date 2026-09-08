@@ -25,12 +25,15 @@ func NewCompanyController() CompanyController {
 
 func (cr *CompanyController) Get(c *gin.Context) {
 	page, pageSize := helper.GetPagination(c)
-
+	userID, ok := helper.GetUserID(c)
+	if !ok {
+		return
+	}
 	filter := map[string]string{
 		"name": c.Query("name"),
 	}
 
-	data, meta, err := cr.service.Get(c.Request.Context(), request.Pagination{
+	data, meta, err := cr.service.Get(c.Request.Context(), userID, request.Pagination{
 		Page:     page,
 		PageSize: pageSize,
 	}, filter)
