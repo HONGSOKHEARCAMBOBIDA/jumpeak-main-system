@@ -19,7 +19,7 @@ import (
 
 type InvoiceService interface {
 	Create(ctx context.Context, userID int, input request.InvoiceRequestCreate) error
-	Cancel(ctx context.Context, id uint64, userID int, input request.InvoiceRequestCancel) error
+	Cancel(ctx context.Context, id int, userID int, input request.InvoiceRequestCancel) error
 	Get(ctx context.Context, userID int, pf request.Pagination, filter map[string]string) ([]response.InvoiceResponse, *model.PaginationMetadata, error)
 }
 
@@ -38,7 +38,7 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 	defer cancel()
 
 	if len(input.Items) == 0 {
-		return apperror.New(apperror.CodeValidation, "invoice must have at least one item", nil)
+		return apperror.New(apperror.CodeInvalidInput, "invoice must have at least one item", nil)
 	}
 
 	var user model.User
@@ -46,7 +46,6 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 		return err
 	}
 
-	// Compute totals up front so we can run the credit-limit check before touching the DB.
 	var total float64
 	items := make([]model.InvoiceItem, 0, len(input.Items))
 	for _, it := range input.Items {
@@ -63,8 +62,6 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 	}
 
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-		// Lock the customer row so two concurrent invoices can't both pass the
-		// credit-limit check against the same stale outstanding balance.
 		var customer model.Customer
 		if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
 			Where("id = ?", input.CustomerID).
@@ -74,19 +71,32 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 			}
 			return apperror.New(apperror.CodeInternal, "failed to fetch customer", nil)
 		}
-		if customer.Status != model.CustomerStatusActive {
-			return apperror.New(apperror.CodeValidation, "customer is not active", nil)
+		if customer.Status == model.CustomerStatusInactive {
+			return apperror.New(apperror.CodeInvalidInput, "customer is not active", nil)
+		}
+		if customer.Status == model.CustomerStatusBlacklisted {
+			return apperror.New(apperror.CodeForbidden, "customer in black list", nil)
 		}
 		if customer.CreditLimitEnforced && customer.CurrentOutstanding+total > customer.CreditLimit {
-			return apperror.New(apperror.CodeValidation, "invoice exceeds customer credit limit", nil)
+			return apperror.New(apperror.CodeInvalidInput, "invoice exceeds customer credit limit", nil)
+		}
+
+		invoiceDate, err := time.Parse("2006-01-02", input.InvoiceDate)
+		if err != nil {
+			return err
+		}
+
+		dueDate, err := time.Parse("2006-01-02", input.DueDate)
+		if err != nil {
+			return err
 		}
 
 		newdata := model.Invoice{
 			CompanyID:          user.CompanyID,
-			BranchID:           input.BranchID,
+			BranchID:           *user.BranchID,
 			CustomerID:         input.CustomerID,
-			InvoiceDate:        input.InvoiceDate,
-			DueDate:            input.DueDate,
+			InvoiceDate:        invoiceDate,
+			DueDate:            dueDate,
 			CurrencyCode:       input.CurrencyCode,
 			ExchangeRateToBase: input.ExchangeRateToBase,
 			TotalAmount:        total,
@@ -105,15 +115,15 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 		}
 
 		for i := range items {
-			items[i].InvoiceID = newdata.ID
+			items[i].InvoiceID = uint64(newdata.ID)
 		}
 		if err := tx.Create(&items).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to create invoice items", nil)
 		}
 
-		if err := appendLedgerEntry(
-			tx, user.CompanyID, input.CustomerID, input.InvoiceDate,
-			model.CustomerLedgerReferenceInvoice, newdata.ID,
+		if err := helper.AppendLedgerEntry(
+			tx, user.CompanyID, input.CustomerID, invoiceDate,
+			model.CustomerLedgerReferenceInvoice, uint64(newdata.ID),
 			fmt.Sprintf("Invoice %s", newdata.InvoiceNumber),
 			total, 0,
 		); err != nil {
@@ -133,7 +143,7 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 
 // Cancel voids an invoice that has not received any payment yet and reverses its
 // effect on the customer's outstanding balance and ledger.
-func (s *invoiceservice) Cancel(ctx context.Context, id uint64, userID int, input request.InvoiceRequestCancel) error {
+func (s *invoiceservice) Cancel(ctx context.Context, id int, userID int, input request.InvoiceRequestCancel) error {
 	ctx, cancel := context.WithTimeout(ctx, utils.DefaultQueryTimeout)
 	defer cancel()
 
@@ -147,10 +157,10 @@ func (s *invoiceservice) Cancel(ctx context.Context, id uint64, userID int, inpu
 			return apperror.New(apperror.CodeInternal, "failed to fetch invoice", nil)
 		}
 		if invoice.Status == model.InvoiceStatusCancelled {
-			return apperror.New(apperror.CodeValidation, "invoice is already cancelled", nil)
+			return apperror.New(apperror.CodeInvalidInput, "invoice is already cancelled", nil)
 		}
 		if invoice.PaidAmount > 0 {
-			return apperror.New(apperror.CodeValidation, "cannot cancel an invoice that has received payment; issue a refund or adjustment instead", nil)
+			return apperror.New(apperror.CodeInvalidInput, "cannot cancel an invoice that has received payment; issue a refund or adjustment instead", nil)
 		}
 
 		outstanding := invoice.OutstandingAmount
@@ -165,9 +175,9 @@ func (s *invoiceservice) Cancel(ctx context.Context, id uint64, userID int, inpu
 			return apperror.New(apperror.CodeInternal, "failed to cancel invoice", nil)
 		}
 
-		if err := appendLedgerEntry(
+		if err := helper.AppendLedgerEntry(
 			tx, invoice.CompanyID, invoice.CustomerID, now,
-			model.CustomerLedgerReferenceInvoice, invoice.ID,
+			model.CustomerLedgerReferenceInvoice, uint64(invoice.ID),
 			fmt.Sprintf("Cancelled invoice %s", invoice.InvoiceNumber),
 			0, outstanding,
 		); err != nil {
@@ -243,6 +253,11 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 
 	if err := dataQuery.Order("i.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch invoices: %w", err)
+	}
+
+	for i := range data {
+		data[i].InvoiceDate = helper.FormatDate(data[i].InvoiceDate)
+		data[i].DueDate = helper.FormatDate(data[i].DueDate)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

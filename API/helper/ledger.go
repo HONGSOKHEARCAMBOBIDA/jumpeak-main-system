@@ -31,7 +31,7 @@ func lastLedgerBalance(tx *gorm.DB, customerID uint64) (float64, error) {
 // running balance. Debit increases what the customer owes (invoices, refunds paid
 // out, reversed payments). Credit decreases it (payments received, write-offs,
 // discounts, cancelled invoices).
-func appendLedgerEntry(
+func AppendLedgerEntry(
 	tx *gorm.DB,
 	companyID, customerID uint64,
 	entryDate time.Time,

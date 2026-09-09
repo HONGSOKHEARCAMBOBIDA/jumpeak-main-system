@@ -44,4 +44,22 @@ const (
 	ViewProduct   = "view.Product"
 	AddProduct    = "add.Product"
 	UpdateProduct = "update.Product/:id"
+
+	// Invoice
+	ViewInvoice   = "view.Invoice"
+	AddInvoice    = "add.Invoice"
+	CancelInvoice = "Cancel.Invoice"
+
+	// Payment
+	ViewPayment = "view.Payment"
+	AddPayment  = "add.Payment"
+	VoidPayment = "Void.Payment"
+
+	// DebAdjustment
+	ViewDebAdjustment = "view.DebAdjustment"
+	AddDebAdjustment  = "add.DebAdjustment"
+
+	// Refund
+	ViewRefund = "view.Refund"
+	AddRefund  = "add.Refund"
 )

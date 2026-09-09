@@ -19,7 +19,7 @@ import (
 
 type PaymentService interface {
 	Create(ctx context.Context, userID int, input request.PaymentRequestCreate) error
-	Void(ctx context.Context, id uint64, userID int, input request.PaymentRequestVoid) error
+	Void(ctx context.Context, id int, userID int, input request.PaymentRequestVoid) error
 	Get(ctx context.Context, userID int, pf request.Pagination, filter map[string]string) ([]response.PaymentResponse, *model.PaginationMetadata, error)
 }
 
@@ -38,14 +38,14 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 	defer cancel()
 
 	if input.Amount <= 0 {
-		return apperror.New(apperror.CodeValidation, "payment amount must be greater than zero", nil)
+		return apperror.New(apperror.CodeInvalidInput, "payment amount must be greater than zero", nil)
 	}
 	var allocatedTotal float64
 	for _, a := range input.Allocations {
 		allocatedTotal += a.Amount
 	}
 	if allocatedTotal > input.Amount {
-		return apperror.New(apperror.CodeValidation, "allocations exceed payment amount", nil)
+		return apperror.New(apperror.CodeInvalidInput, "allocations exceed payment amount", nil)
 	}
 
 	var user model.User
@@ -56,7 +56,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 		newdata := model.Payment{
 			CompanyID:          user.CompanyID,
-			BranchID:           input.BranchID,
+			BranchID:           user.BranchID,
 			CustomerID:         input.CustomerID,
 			PaymentDate:        input.PaymentDate,
 			CurrencyCode:       input.CurrencyCode,
@@ -80,7 +80,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 		// payments can't both allocate against the same stale outstanding balance.
 		for _, alloc := range input.Allocations {
 			if alloc.Amount <= 0 {
-				return apperror.New(apperror.CodeValidation, "allocation amount must be greater than zero", nil)
+				return apperror.New(apperror.CodeInvalidInput, "allocation amount must be greater than zero", nil)
 			}
 			var invoice model.Invoice
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -91,15 +91,15 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 				return apperror.New(apperror.CodeInternal, "failed to fetch invoice", nil)
 			}
 			if invoice.CustomerID != input.CustomerID {
-				return apperror.New(apperror.CodeValidation, "invoice does not belong to this customer", nil)
+				return apperror.New(apperror.CodeInvalidInput, "invoice does not belong to this customer", nil)
 			}
 			if alloc.Amount > invoice.OutstandingAmount {
-				return apperror.New(apperror.CodeValidation, fmt.Sprintf("allocation exceeds outstanding balance of invoice %s", invoice.InvoiceNumber), nil)
+				return apperror.New(apperror.CodeInvalidInput, fmt.Sprintf("allocation exceeds outstanding balance of invoice %s", invoice.InvoiceNumber), nil)
 			}
 
 			allocation := model.PaymentAllocation{
 				PaymentID: newdata.ID,
-				InvoiceID: invoice.ID,
+				InvoiceID: uint64(invoice.ID),
 				Amount:    alloc.Amount,
 			}
 			if err := tx.Create(&allocation).Error; err != nil {
@@ -121,7 +121,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 			}
 		}
 
-		if err := appendLedgerEntry(
+		if err := helper.AppendLedgerEntry(
 			tx, user.CompanyID, input.CustomerID, input.PaymentDate,
 			model.CustomerLedgerReferencePayment, newdata.ID,
 			fmt.Sprintf("Payment %s", newdata.PaymentNumber),
@@ -143,7 +143,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 
 // Void reverses a payment: every allocation is unwound so the affected invoices
 // re-open, and the customer's balance/ledger are restored to their pre-payment state.
-func (s *paymentservice) Void(ctx context.Context, id uint64, userID int, input request.PaymentRequestVoid) error {
+func (s *paymentservice) Void(ctx context.Context, id int, userID int, input request.PaymentRequestVoid) error {
 	ctx, cancel := context.WithTimeout(ctx, utils.DefaultQueryTimeout)
 	defer cancel()
 
@@ -157,7 +157,7 @@ func (s *paymentservice) Void(ctx context.Context, id uint64, userID int, input 
 			return apperror.New(apperror.CodeInternal, "failed to fetch payment", nil)
 		}
 		if payment.Status == model.PaymentStatusVoided {
-			return apperror.New(apperror.CodeValidation, "payment is already voided", nil)
+			return apperror.New(apperror.CodeInvalidInput, "payment is already voided", nil)
 		}
 
 		var allocations []model.PaymentAllocation
@@ -190,7 +190,7 @@ func (s *paymentservice) Void(ctx context.Context, id uint64, userID int, input 
 			return apperror.New(apperror.CodeInternal, "failed to void payment", nil)
 		}
 
-		if err := appendLedgerEntry(
+		if err := helper.AppendLedgerEntry(
 			tx, payment.CompanyID, payment.CustomerID, time.Now(),
 			model.CustomerLedgerReferencePayment, payment.ID,
 			fmt.Sprintf("Voided payment %s: %s", payment.PaymentNumber, input.Reason),

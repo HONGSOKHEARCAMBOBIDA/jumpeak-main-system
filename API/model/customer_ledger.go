@@ -27,3 +27,7 @@ type CustomerLedger struct {
 	RunningBalance float64                     `gorm:"type:decimal(18,2);not null" json:"running_balance"`
 	CreatedAt      time.Time                   `gorm:"not null;autoCreateTime" json:"created_at"`
 }
+
+func (CustomerLedger) TableName() string {
+	return "customer_ledger"
+}

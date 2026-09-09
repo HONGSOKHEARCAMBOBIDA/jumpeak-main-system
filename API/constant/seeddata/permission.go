@@ -75,4 +75,44 @@ var Permissions = []model.Permission{
 		Name:        "update.Product",
 		DisplayName: "update.Product",
 	},
+	{
+		Name:        "view.Invoice",
+		DisplayName: "view.Invoice",
+	},
+	{
+		Name:        "add.Invoice",
+		DisplayName: "add.Invoice",
+	},
+	{
+		Name:        "Cancel.Invoice",
+		DisplayName: "Cancel.Invoice",
+	},
+	{
+		Name:        "view.Payment",
+		DisplayName: "view.Payment",
+	},
+	{
+		Name:        "add.Payment",
+		DisplayName: "add.Payment",
+	},
+	{
+		Name:        "Void.Payment",
+		DisplayName: "Void.Payment",
+	},
+	{
+		Name:        "view.DebAdjustment",
+		DisplayName: "view.DebAdjustment",
+	},
+	{
+		Name:        "add.DebAdjustment",
+		DisplayName: "add.DebAdjustment",
+	},
+	{
+		Name:        "view.Refund",
+		DisplayName: "view.Refund",
+	},
+	{
+		Name:        "add.Refund",
+		DisplayName: "add.Refund",
+	},
 }

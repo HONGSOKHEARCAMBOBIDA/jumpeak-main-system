@@ -9,7 +9,6 @@ type PaymentAllocationInput struct {
 
 type PaymentRequestCreate struct {
 	CustomerID         uint64                   `json:"customer_id"`
-	BranchID           *uint64                  `json:"branch_id,omitempty"`
 	PaymentDate        time.Time                `json:"payment_date"`
 	CurrencyCode       string                   `json:"currency_code"`
 	ExchangeRateToBase float64                  `json:"exchange_rate_to_base"`

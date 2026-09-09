@@ -16,6 +16,10 @@ func SetupRoutes(r *gin.Engine) {
 	branchcontroller := controller.NewBranchController()
 	customercontroller := controller.NewCustomerController()
 	productcontroller := controller.NewProductController()
+	invoicecontroller := controller.NewInvoiceController()
+	paymentcontroller := controller.NewPaymentController()
+	deptadjustmentcontroller := controller.NewDebtAdjustmentController()
+	refundcontroller := controller.NewRefundController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -58,5 +62,22 @@ func SetupRoutes(r *gin.Engine) {
 		auth.POST(route.AddProduct, middleware.PermissionMiddleware(permission.AddProduct), productcontroller.Create)
 		auth.GET(route.ViewProduct, middleware.PermissionMiddleware(permission.ViewProduct), productcontroller.Get)
 		auth.PUT(route.UpdateProduct, middleware.PermissionMiddleware(permission.UpdateProduct), productcontroller.Update)
+
+		// Invoice
+		auth.GET(route.ViewInvoice, middleware.PermissionMiddleware(permission.ViewInvoice), invoicecontroller.Get)
+		auth.POST(route.AddInvoice, middleware.PermissionMiddleware(permission.AddInvoice), invoicecontroller.Create)
+		auth.POST(route.CancelInvoice, middleware.PermissionMiddleware(permission.CancelInvoice), invoicecontroller.Cancel)
+
+		// Payment
+		auth.GET(route.ViewPayment, middleware.PermissionMiddleware(permission.ViewPayment), paymentcontroller.Get)
+		auth.POST(route.AddPayment, middleware.PermissionMiddleware(permission.AddPayment), paymentcontroller.Create)
+
+		// Refund
+		auth.GET(route.ViewRefund, middleware.PermissionMiddleware(permission.ViewRefund), refundcontroller.Get)
+		auth.POST(route.AddRefund, middleware.PermissionMiddleware(permission.AddRefund), invoicecontroller.Create)
+
+		// Debadjustment
+		auth.GET(route.ViewDebAdjustment, middleware.PermissionMiddleware(permission.ViewDebAdjustment), deptadjustmentcontroller.Get)
+		auth.POST(route.AddDebAdjustment, middleware.PermissionMiddleware(permission.AddDebAdjustment), deptadjustmentcontroller.Create)
 	}
 }

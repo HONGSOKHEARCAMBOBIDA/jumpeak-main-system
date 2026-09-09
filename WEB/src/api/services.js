@@ -61,3 +61,25 @@ export const updatecustomer = (id,data) => api.put(`/update.Customer/${id}`,data
 export const getproduct = (params) => api.get(`/view.Product`,{params})
 export const addproduct = (data) => api.post('/add.Product',data)
 export const updateproduct = (id,data) => api.put(`/update.Product/${id}`,data)
+
+// Invoice
+
+export const getinvoice = (params) => api.get(`/view.Invoice`,{params})
+export const addinvoice = (data) => api.post('/add.Invoice',data)
+export const cancelinvoice = (id,data) => api.put(`/Cancel.Invoice/${id}`,data)
+
+// Payment
+
+export const getPayment = (params) => api.get(`/view.Payment`,{params})
+export const addPayment = (data) => api.post('/add.Payment',data)
+export const VoidPayment = (id,data) => api.put(`/Void.Payment/${id}`,data)
+
+// DebAdjustment
+
+export const getDebAdjustment = (params) => api.get(`/view.DebAdjustment`,{params})
+export const addDebAdjustment = (data) => api.post('/add.DebAdjustment',data)
+
+// Refund
+
+export const getRefund = (params) => api.get(`/view.Refund`,{params})
+export const addRefund = (data) => api.post('/add.Refund',data)

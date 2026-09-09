@@ -39,14 +39,14 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 	defer cancel()
 
 	if input.Amount <= 0 {
-		return apperror.New(apperror.CodeValidation, "refund amount must be greater than zero", nil)
+		return apperror.New(apperror.CodeInvalidInput, "refund amount must be greater than zero", nil)
 	}
 	var allocatedTotal float64
 	for _, a := range input.Allocations {
 		allocatedTotal += a.Amount
 	}
 	if allocatedTotal != input.Amount {
-		return apperror.New(apperror.CodeValidation, "allocations must add up to the refund amount", nil)
+		return apperror.New(apperror.CodeInvalidInput, "allocations must add up to the refund amount", nil)
 	}
 
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
@@ -59,7 +59,7 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 			return apperror.New(apperror.CodeInternal, "failed to fetch payment", nil)
 		}
 		if payment.Status != model.PaymentStatusCompleted {
-			return apperror.New(apperror.CodeValidation, "only completed payments can be refunded", nil)
+			return apperror.New(apperror.CodeInvalidInput, "only completed payments can be refunded", nil)
 		}
 
 		newdata := model.Refund{
@@ -75,7 +75,7 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 
 		for _, alloc := range input.Allocations {
 			if alloc.Amount <= 0 {
-				return apperror.New(apperror.CodeValidation, "allocation amount must be greater than zero", nil)
+				return apperror.New(apperror.CodeInvalidInput, "allocation amount must be greater than zero", nil)
 			}
 			var invoice model.Invoice
 			if err := tx.Clauses(clause.Locking{Strength: "UPDATE"}).
@@ -86,15 +86,15 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 				return apperror.New(apperror.CodeInternal, "failed to fetch invoice", nil)
 			}
 			if invoice.CustomerID != payment.CustomerID {
-				return apperror.New(apperror.CodeValidation, "invoice does not belong to the payment's customer", nil)
+				return apperror.New(apperror.CodeInvalidInput, "invoice does not belong to the payment's customer", nil)
 			}
 			if alloc.Amount > invoice.PaidAmount {
-				return apperror.New(apperror.CodeValidation, fmt.Sprintf("refund exceeds paid amount on invoice %s", invoice.InvoiceNumber), nil)
+				return apperror.New(apperror.CodeInvalidInput, fmt.Sprintf("refund exceeds paid amount on invoice %s", invoice.InvoiceNumber), nil)
 			}
 
 			refundAlloc := model.RefundAllocation{
-				RefundID:  newdata.ID,
-				InvoiceID: invoice.ID,
+				RefundID:  uint64(newdata.ID),
+				InvoiceID: uint64(invoice.ID),
 				Amount:    alloc.Amount,
 			}
 			if err := tx.Create(&refundAlloc).Error; err != nil {
@@ -114,9 +114,9 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 			}
 		}
 
-		if err := appendLedgerEntry(
+		if err := helper.AppendLedgerEntry(
 			tx, payment.CompanyID, payment.CustomerID, input.RefundedAt,
-			model.CustomerLedgerReferenceRefund, newdata.ID,
+			model.CustomerLedgerReferenceRefund, uint64(newdata.ID),
 			fmt.Sprintf("Refund against payment %s: %s", payment.PaymentNumber, input.Reason),
 			input.Amount, 0,
 		); err != nil {
