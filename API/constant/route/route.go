@@ -39,4 +39,9 @@ const (
 	ViewCustomer   = "view.Customer"
 	AddCustomer    = "add.Customer"
 	UpdateCustomer = "update.Customer/:id"
+
+	// Product
+	ViewProduct   = "view.Product"
+	AddProduct    = "add.Product"
+	UpdateProduct = "update.Product/:id"
 )

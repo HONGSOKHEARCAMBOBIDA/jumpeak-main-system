@@ -12,11 +12,11 @@
             </el-icon>
             <span>អតិថិជន</span>
           </div>
-          <div class="action-btn" @click="$router.push('/attendance')">
+          <div class="action-btn" @click="$router.push('/product')">
             <el-icon size="26" color="#67c23a">
               <Clock />
             </el-icon>
-            <span>មេីលវត្តមាន</span>
+            <span>ឥវ៉ាន់ទាំងអស់</span>
           </div>
           <div class="action-btn" @click="$router.push('/leavetype')">
             <el-icon size="26" color="#8E44AD">

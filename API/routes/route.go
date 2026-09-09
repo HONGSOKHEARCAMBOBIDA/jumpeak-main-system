@@ -15,6 +15,7 @@ func SetupRoutes(r *gin.Engine) {
 	companycontroller := controller.NewCompanyController()
 	branchcontroller := controller.NewBranchController()
 	customercontroller := controller.NewCustomerController()
+	productcontroller := controller.NewProductController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -52,5 +53,10 @@ func SetupRoutes(r *gin.Engine) {
 		auth.POST(route.AddCustomer, middleware.PermissionMiddleware(permission.AddCustomer), customercontroller.Create)
 		auth.GET(route.ViewCustomer, middleware.PermissionMiddleware(permission.ViewCustomer), customercontroller.Get)
 		auth.PUT(route.UpdateCustomer, middleware.PermissionMiddleware(permission.UpdateCustomer), customercontroller.Update)
+
+		// Product
+		auth.POST(route.AddProduct, middleware.PermissionMiddleware(permission.AddProduct), productcontroller.Create)
+		auth.GET(route.ViewProduct, middleware.PermissionMiddleware(permission.ViewProduct), productcontroller.Get)
+		auth.PUT(route.UpdateProduct, middleware.PermissionMiddleware(permission.UpdateProduct), productcontroller.Update)
 	}
 }

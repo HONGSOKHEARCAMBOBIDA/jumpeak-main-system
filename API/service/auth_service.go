@@ -53,6 +53,8 @@ var requiredPermissions = []string{
 	"edit.user",
 	"add.Customer",
 	"update.Customer",
+	"add.Product",
+	"update.Product",
 }
 
 func (s *authservice) GetRole(ctx context.Context, id int) ([]model.Role, error) {

@@ -55,3 +55,9 @@ export const getbranchnopagination = (id) => api.get(`/view.Branch.no.pagination
 export const getcustomer = (params) => api.get(`/view.Customer`,{params})
 export const addcustomer = (data) => api.post('/add.Customer',data)
 export const updatecustomer = (id,data) => api.put(`/update.Customer/${id}`,data)
+
+// Product
+
+export const getproduct = (params) => api.get(`/view.Product`,{params})
+export const addproduct = (data) => api.post('/add.Product',data)
+export const updateproduct = (id,data) => api.put(`/update.Product/${id}`,data)
