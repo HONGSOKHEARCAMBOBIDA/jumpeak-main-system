@@ -2,6 +2,7 @@ package controller
 
 import (
 	"mysql/constant/share"
+	"mysql/helper"
 	"mysql/request"
 	"mysql/service"
 	"mysql/utils"
@@ -48,4 +49,21 @@ func (cr *BranchController) Update(c *gin.Context) {
 		return
 	}
 	share.ResponseSuccess(c, http.StatusOK, share.Updated)
+}
+
+func (cr *BranchController) GetBranchNoPagination(c *gin.Context) {
+	companyID, ok := utils.GetParamID(c)
+	if !ok {
+		return
+	}
+	userID, ok := helper.GetUserID(c)
+	if !ok {
+		return
+	}
+	data, err := cr.service.GetBranchNoPagination(c.Request.Context(), userID, companyID)
+	if err != nil {
+		share.ResponseError(c, http.StatusGatewayTimeout, err.Error())
+		return
+	}
+	share.RespondDate(c, http.StatusOK, data)
 }

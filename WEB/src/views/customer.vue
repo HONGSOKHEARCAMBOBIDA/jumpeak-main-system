@@ -1,10 +1,12 @@
 <script setup>
-import { ref, reactive, onMounted, computed } from "vue";
+import { ref, reactive, onMounted, computed, watch } from "vue";
 import { useUserDataStore } from "../stores/user_data";
 import {
   getcustomer,
   addcustomer,
   updatecustomer,
+  getcompanynopagitaion,
+  getbranchnopagination,
 } from "../api/services.js";
 import AppTable from "../../components/AppTable.vue";
 import AppButton from "../../components/AppButton.vue";
@@ -14,7 +16,7 @@ import { useLoading } from "../../composables/useLoading.js";
 import AppSelect from "../../components/AppSelect.vue";
 import AppInput from "../../components/AppInput.vue";
 import AppForm from "../../components/form/AppForm.vue";
-
+import AppFilterBar from "../../components/AppFilterBar.vue";
 const notify = useNotification();
 const userDataStore = useUserDataStore();
 
@@ -35,7 +37,38 @@ const formRef = ref();
 // filters
 const filters = reactive({
   name: "",
+  company_id:null,
+  branch_id:null
 });
+
+const companyoptions = ref([])
+const branchoptions = ref([])
+async function fetchCompanyOptions() {
+  try {
+    const res = await getcompanynopagitaion()
+    companyoptions.value = (res.data.data || []).map((a) => ({
+      label: a.name,
+      value: a.id,
+    }))
+  } catch (e) {
+    notify.error(e?.response?.data?.message || e.message || 'Failed to load company')
+  }
+}
+
+async function loadBranchOption(companyID) {
+  if(!companyID) return []
+  try {
+
+    const res = await getbranchnopagination(companyID)
+    return (res.data.data || []).map((f) => ({
+      label: f.name,
+      value: f.id,
+    }))
+  } catch (e) {
+    notify.error(e?.response?.data?.message || e.message || 'Failed to load branch')
+    return []
+  }
+}
 
 const StatusOption = [
   { label: "ACTIVE", value: "ACTIVE" },
@@ -68,11 +101,14 @@ const canEditCustomer = computed(() =>
 async function fetchCustomers() {
   loading.value = true;
   try {
-    const res = await getcustomer({
+    const params = {
       page: page.value,
       page_size: pageSize.value,
-      name: filters.name || undefined,
-    });
+    }
+    if(filters.name) params.name = filters.name
+    if(filters.company_id) params.company_id = filters.company_id
+    if(filters.branch_id) params.branch_id = filters.branch_id
+    const res = await getcustomer(params)
     customers.value = res.data.data || [];
     total.value = res.data.pagination?.totalCount || 0;
   } catch (e) {
@@ -82,10 +118,7 @@ async function fetchCustomers() {
   }
 }
 
-function handleSearch() {
-  page.value = 1;
-  fetchCustomers();
-}
+
 
 function openCreate() {
   isEdit.value = false;
@@ -155,24 +188,78 @@ async function handleSave() {
   }
 }
 
+watch(
+  () => filters.company_id,
+  async (newVal) => {
+    filters.branch_id = null;
+    branchoptions.value = [];
+    branchoptions.value = await loadBranchOption(newVal);
+    page.value = 1;
+    fetchCustomers();
+  }
+);
+
+watch(
+  () => filters.branch_id,
+  async () => {
+    page.value = 1;
+    fetchCustomers();
+  }
+);
+
+watch(
+  () => filters.name,
+  async () => {
+    page.value = 1;
+    fetchCustomers();
+  }
+);
+
 onMounted(() => {
   fetchCustomers();
+  fetchCompanyOptions()
 });
 </script>
 
 <template>
   <div>
-    <div class="page-header">
-      <AppInput
+      <AppFilterBar
+      :fields="[
+        {slot: 'name',span: 4},
+        {slot: 'company',span: 4},
+        {slot: 'branch',span: 4},
+        {slot: 'create',span: 4},
+      ]"
+      >
+
+      <template #name>
+ <AppInput
         v-model="filters.name"
         placeholder="ស្វែងរកតាមឈ្មោះ"
         clearable
-        style="width: 240px; margin-right: 12px"
-        @keyup.enter="handleSearch"
-        @clear="handleSearch"
+        size="small"
       />
-      <AppButton size="default" @click="handleSearch">ស្វែងរក</AppButton>
-      <AppButton
+      </template>
+      <template #company>
+<AppSelect
+            v-model="filters.company_id"
+            :options="companyoptions"
+            label="ក្រុមហ៑ុន"
+            placeholder="ក្រុមហ៑ុន"
+            clearable
+          />
+      </template>
+      <template #branch>
+<AppSelect
+            v-model="filters.branch_id"
+            :options="branchoptions"
+            label="សាខា"
+            placeholder="សាខា"
+            clearable
+          />
+      </template>
+           <template #create>
+             <AppButton
         v-if="canAddCustomer"
         type="primary"
         @click="openCreate"
@@ -181,7 +268,11 @@ onMounted(() => {
       >
         បន្ថែមអតិថិជន
       </AppButton>
-    </div>
+           </template>
+
+      </AppFilterBar>
+     
+
 
     <el-card class="table-card">
       <AppTable
@@ -210,7 +301,7 @@ onMounted(() => {
         <el-text>{{ row.branch_name }} | <el-text size="small" type="primary">{{ row.branch_code }}</el-text></el-text>
       </template>
       <template #credit_limit="{row}">
-        <el-text>{{ row.credit_limit }} <el-text size="small" type="primary">{{ row.company_currency }}</el-text></el-text>
+        <el-text tag="b">{{ row.credit_limit }} <el-text size="small" type="primary">{{ row.company_currency }}</el-text></el-text>
       </template>
       <template #current_outstanding="{row}">
         <el-text>{{ row.current_outstanding }} <el-text size="small" type="primary">{{ row.company_currency }}</el-text></el-text>

@@ -41,11 +41,13 @@ export const editrole = (id,data) => api.put(`/edit.role/${id}`,data)
 export const getcompany = (params) => api.get(`/view.company`,{params})
 export const addcompany = (data) => api.post('/add.company',data)
 export const updatecompany = (id,data) => api.put(`/update.company/${id}`,data)
+export const getcompanynopagitaion = () => api.get('/view.company.no.pagination')
 
 
 // branch
 export const addbranch = (data) => api.post('/add.Branch',data)
 export const updatebranch = (id,data) => api.put(`/update.Branch/${id}`,data)
+export const getbranchnopagination = (id) => api.get(`/view.Branch.no.pagination/${id}`)
 
 
 // Customer

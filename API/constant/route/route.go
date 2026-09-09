@@ -24,14 +24,16 @@ const (
 	EditRole = "edit.role/:id"
 
 	// Company
-	ViewCompany   = "view.company"
-	AddCompany    = "add.company"
-	UpdateCompany = "update.company/:id"
+	ViewCompany             = "view.company"
+	ViewCompanyNoPagination = "view.company.no.pagination"
+	AddCompany              = "add.company"
+	UpdateCompany           = "update.company/:id"
 
 	// Branch
-	ViewBranch   = "view.Branch"
-	AddBranch    = "add.Branch"
-	UpdateBranch = "update.Branch/:id"
+	ViewBranch             = "view.Branch"
+	ViewBranchNoPagination = "view.Branch.no.pagination/:id"
+	AddBranch              = "add.Branch"
+	UpdateBranch           = "update.Branch/:id"
 
 	// Customer
 	ViewCustomer   = "view.Customer"

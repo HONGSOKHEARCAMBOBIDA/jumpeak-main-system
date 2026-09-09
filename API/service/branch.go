@@ -16,6 +16,7 @@ import (
 type BranchService interface {
 	Create(ctx context.Context, input request.BranchRequestCreate) error
 	Update(ctx context.Context, id int, input request.BranchRequestUpdate) error
+	GetBranchNoPagination(ctx context.Context, userID int, companyID int) ([]model.Branch, error)
 }
 
 type branchservice struct {
@@ -71,4 +72,26 @@ func (s *branchservice) Update(ctx context.Context, id int, input request.Branch
 		return nil
 	})
 	return err
+}
+
+func (s *branchservice) GetBranchNoPagination(ctx context.Context, userID int, companyID int) ([]model.Branch, error) {
+	var data []model.Branch
+	var user model.User
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	base := func() *gorm.DB {
+		return s.db.WithContext(ctx).
+			Table("branches b").
+			Where("b.company_id = ?", companyID)
+	}
+	dataQuery := base().Select(`
+		b.id AS id,
+		b.name AS name
+	`)
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
+	if err := dataQuery.Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }

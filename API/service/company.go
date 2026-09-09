@@ -19,6 +19,7 @@ type CompanyService interface {
 	Create(ctx context.Context, input request.CompanyRequestCreate) error
 	Get(ctx context.Context, userID int, pf request.Pagination, filter map[string]string) ([]response.CompanyResponse, *model.PaginationMetadata, error)
 	Update(ctx context.Context, id int, input request.CompanyRequestUpdate) error
+	GetCompanyNoPagination(ctx context.Context, userID int) ([]model.Company, error)
 }
 
 type companyservice struct {
@@ -204,4 +205,25 @@ func (s *companyservice) Get(ctx context.Context, userID int, pf request.Paginat
 	}
 
 	return companies, helper.BuildPaginationMeta(pf, total), nil
+}
+
+func (s *companyservice) GetCompanyNoPagination(ctx context.Context, userID int) ([]model.Company, error) {
+	var data []model.Company
+	var user model.User
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
+		return nil, err
+	}
+	base := func() *gorm.DB {
+		return s.db.WithContext(ctx).
+			Table("companies c")
+	}
+	dataQuery := base().Select(`
+		c.id AS id,
+		c.name AS name
+	`)
+	dataQuery = helper.CompanyFilter(dataQuery, s.db, user.Role, user)
+	if err := dataQuery.Scan(&data).Error; err != nil {
+		return nil, err
+	}
+	return data, nil
 }

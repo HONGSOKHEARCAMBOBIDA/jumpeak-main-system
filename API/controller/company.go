@@ -23,6 +23,19 @@ func NewCompanyController() CompanyController {
 	}
 }
 
+func (cr *CompanyController) GetCompanyNoPagination(c *gin.Context) {
+	userID, ok := helper.GetUserID(c)
+	if !ok {
+		return
+	}
+	data, err := cr.service.GetCompanyNoPagination(c.Request.Context(), userID)
+	if err != nil {
+		share.ResponseError(c, http.StatusGatewayTimeout, err.Error())
+		return
+	}
+	share.RespondDate(c, http.StatusOK, data)
+}
+
 func (cr *CompanyController) Get(c *gin.Context) {
 	page, pageSize := helper.GetPagination(c)
 	userID, ok := helper.GetUserID(c)
