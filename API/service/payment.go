@@ -52,13 +52,16 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
 		return err
 	}
-
 	err := s.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		paymentdate, err := time.Parse("2006-01-02", input.PaymentDate)
+		if err != nil {
+			return err
+		}
 		newdata := model.Payment{
 			CompanyID:          user.CompanyID,
 			BranchID:           user.BranchID,
 			CustomerID:         input.CustomerID,
-			PaymentDate:        input.PaymentDate,
+			PaymentDate:        paymentdate,
 			CurrencyCode:       input.CurrencyCode,
 			ExchangeRateToBase: input.ExchangeRateToBase,
 			Amount:             input.Amount,
@@ -122,7 +125,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 		}
 
 		if err := helper.AppendLedgerEntry(
-			tx, user.CompanyID, input.CustomerID, input.PaymentDate,
+			tx, user.CompanyID, input.CustomerID, paymentdate,
 			model.CustomerLedgerReferencePayment, newdata.ID,
 			fmt.Sprintf("Payment %s", newdata.PaymentNumber),
 			0, input.Amount,
@@ -266,6 +269,10 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 
 	if err := dataQuery.Order("p.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch payments: %w", err)
+	}
+
+	for i := range data {
+		data[i].PaymentDate = helper.FormatDate(data[i].PaymentDate)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

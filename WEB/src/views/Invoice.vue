@@ -57,7 +57,7 @@ async function searchCustomers(query) {
   try {
     const res = await getcustomer({ page: 1, page_size: 20, name: query || "" });
     customerOptions.value = (res.data.data || []).map((c) => ({
-      label: `${c.name} (${c.customer_code})`,
+      label: `${c.name} (${c.customer_code}) | ${c.status}`,
       value: c.id,
       raw: c,
     }));
@@ -357,13 +357,13 @@ onMounted(() => {
         ]"
       >
         <template #total_amount="{ row }">
-          <el-text tag="b">{{ row.total_amount }} <el-text size="small" type="primary">{{ row.currency_code }}</el-text></el-text>
+          <el-text tag="b" type="primary">{{ row.total_amount }} <el-text size="small" type="primary">{{ row.currency_code }}</el-text></el-text>
         </template>
         <template #paid_amount="{ row }">
-          <el-text type="success">{{ row.paid_amount }}</el-text>
+          <el-text tag="b" type="success">{{ row.paid_amount }} <el-text size="small" type="success">{{ row.currency_code }}</el-text></el-text>
         </template>
         <template #outstanding_amount="{ row }">
-          <el-text :type="row.outstanding_amount > 0 ? 'danger' : 'info'">{{ row.outstanding_amount }}</el-text>
+          <el-text tag="b" :type="row.outstanding_amount > 0 ? 'danger' : 'info'">{{ row.outstanding_amount }} <el-text size="small" type="danger">{{ row.currency_code }}</el-text></el-text>
         </template>
         <template #status="{ row }">
           <el-text

@@ -80,6 +80,11 @@ const routes = [
         component: () => import("../views/Invoice.vue"),
       },
       {
+        path: "Payment",
+        name: "Payment",
+        component: () => import("../views/Payment.vue"),
+      },
+      {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: () => import("../views/NotFound.vue"),

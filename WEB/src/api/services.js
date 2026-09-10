@@ -70,9 +70,9 @@ export const cancelinvoice = (id,data) => api.put(`/Cancel.Invoice/${id}`,data)
 
 // Payment
 
-export const getPayment = (params) => api.get(`/view.Payment`,{params})
-export const addPayment = (data) => api.post('/add.Payment',data)
-export const VoidPayment = (id,data) => api.put(`/Void.Payment/${id}`,data)
+export const getpayment = (params) => api.get(`/view.Payment`,{params})
+export const addpayment = (data) => api.post('/add.Payment',data)
+export const voidpayment = (id,data) => api.put(`/Void.Payment/${id}`,data)
 
 // DebAdjustment
 

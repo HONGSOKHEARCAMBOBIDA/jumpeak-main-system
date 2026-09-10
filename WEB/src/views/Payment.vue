@@ -44,6 +44,7 @@ const StatusOption = [
   { label: "COMPLETED", value: "COMPLETED" },
   { label: "VOIDED", value: "VOIDED" },
 ];
+
 const MethodOption = [
   { label: "CASH", value: "CASH" },
   { label: "BANK", value: "BANK" },
@@ -83,7 +84,7 @@ async function loadOpenInvoices(customerId) {
     openInvoiceOptions.value = (res.data.data || [])
       .filter((i) => i.outstanding_amount > 0)
       .map((i) => ({
-        label: `${i.invoice_number} — នៅជំពាក់ ${i.outstanding_amount}`,
+        label: `${i.invoice_number} — នៅជំពាក់ ${i.outstanding_amount}${i.currency_code}`,
         value: i.id,
         raw: i,
       }));
@@ -102,7 +103,7 @@ function blankAllocation() {
 const form = reactive({
   customer_id: null,
   payment_date: "",
-  currency_code: "USD",
+  currency_code: "KHR",
   exchange_rate_to_base: 1,
   amount: 0,
   method: "CASH",
@@ -144,7 +145,7 @@ const canAddPayment = computed(() =>
   userDataStore.permissions?.some((p) => p.name === "add.Payment"),
 );
 const canVoidPayment = computed(() =>
-  userDataStore.permissions?.some((p) => p.name === "void.Payment"),
+  userDataStore.permissions?.some((p) => p.name === "Void.Payment"),
 );
 
 async function fetchPayments() {
@@ -167,7 +168,7 @@ async function fetchPayments() {
 function openCreate() {
   form.customer_id = null;
   form.payment_date = "";
-  form.currency_code = "USD";
+  form.currency_code = "KHR";
   form.exchange_rate_to_base = 1;
   form.amount = 0;
   form.method = "CASH";
@@ -350,7 +351,7 @@ onMounted(() => {
       </AppTable>
     </el-card>
 
-    <AppDialog v-model="dialogVisible" title="បង្កើតការទូទាត់" width="700px" :showDefaultFooter="false">
+    <AppDialog v-model="dialogVisible" title="បង្កើតការទូទាត់" width="45%" :showDefaultFooter="false">
       <AppForm
         ref="formRef"
         :model="form"
@@ -365,6 +366,7 @@ onMounted(() => {
           label="អតិថិជន"
           prop="customer_id"
           placeholder="ជ្រើសរើសអតិថិជន"
+          size="large"
           filterable
           remote
           :remote-method="searchCustomers"
@@ -377,7 +379,7 @@ onMounted(() => {
             <AppInput v-model="form.payment_date" label="កាលបរិច្ឆេទបង់ប្រាក់" prop="payment_date" type="date" />
           </el-col>
           <el-col :span="12">
-            <AppSelect v-model="form.method" :options="MethodOption" label="មធ្យោបាយបង់ប្រាក់" prop="method" />
+            <AppSelect v-model="form.method" :options="MethodOption" size="large" label="មធ្យោបាយបង់ប្រាក់" prop="method" />
           </el-col>
         </el-row>
 
@@ -405,16 +407,18 @@ onMounted(() => {
                 <AppSelect
                   v-model="row.invoice_id"
                   :options="openInvoiceOptions"
+                  label="លេខវិក័យបត្រ"
                   placeholder="ជ្រើសរើសវិក័យបត្រ"
+                  size="large"
                   :loading="invoicesLoading"
                   clearable
                 />
               </el-col>
               <el-col :span="6">
-                <AppInput v-model.number="row.amount" type="number" placeholder="ចំនួន" />
+                <AppInput v-model.number="row.amount" type="number" placeholder="ចំនួនប្រាក់សង" label="ចំនួនប្រាក់សង" />
               </el-col>
               <el-col :span="2" class="item-subtotal">
-                {{ invoiceOutstanding(row.invoice_id) }}
+                {{ invoiceOutstanding(row.invoice_id) }} 
               </el-col>
               <el-col :span="2">
                 <AppButton
@@ -430,14 +434,16 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="item-actions">
-          <AppButton size="small" type="default" icon="Plus" @click="addAllocationRow">
+       
+                  <div class="item-actions">
+          <AppButton size="default" type="primary" plain icon="Plus" @click="addAllocationRow">
             បន្ថែមការបែងចែក
           </AppButton>
           <el-text tag="b" :type="unallocated < 0 ? 'danger' : 'info'">
             មិនទាន់បែងចែក: {{ unallocated.toFixed(2) }}
           </el-text>
         </div>
+    
       </AppForm>
     </AppDialog>
 
@@ -472,7 +478,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   color: var(--el-text-color-secondary);
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .item-actions {
@@ -480,6 +486,7 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-top: 12px;
+  margin-bottom: 10px;
 }
 
 .dialog-actions {
