@@ -20,6 +20,7 @@ func SetupRoutes(r *gin.Engine) {
 	paymentcontroller := controller.NewPaymentController()
 	deptadjustmentcontroller := controller.NewDebtAdjustmentController()
 	refundcontroller := controller.NewRefundController()
+	customerledgercontroller := controller.NewCustomerledgerController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -66,18 +67,22 @@ func SetupRoutes(r *gin.Engine) {
 		// Invoice
 		auth.GET(route.ViewInvoice, middleware.PermissionMiddleware(permission.ViewInvoice), invoicecontroller.Get)
 		auth.POST(route.AddInvoice, middleware.PermissionMiddleware(permission.AddInvoice), invoicecontroller.Create)
-		auth.POST(route.CancelInvoice, middleware.PermissionMiddleware(permission.CancelInvoice), invoicecontroller.Cancel)
+		auth.PUT(route.CancelInvoice, middleware.PermissionMiddleware(permission.CancelInvoice), invoicecontroller.Cancel)
 
 		// Payment
 		auth.GET(route.ViewPayment, middleware.PermissionMiddleware(permission.ViewPayment), paymentcontroller.Get)
 		auth.POST(route.AddPayment, middleware.PermissionMiddleware(permission.AddPayment), paymentcontroller.Create)
+		auth.PUT(route.VoidPayment, middleware.PermissionMiddleware(permission.VoidPayment), paymentcontroller.Void)
 
 		// Refund
 		auth.GET(route.ViewRefund, middleware.PermissionMiddleware(permission.ViewRefund), refundcontroller.Get)
-		auth.POST(route.AddRefund, middleware.PermissionMiddleware(permission.AddRefund), invoicecontroller.Create)
+		auth.POST(route.AddRefund, middleware.PermissionMiddleware(permission.AddRefund), refundcontroller.Create)
 
 		// Debadjustment
 		auth.GET(route.ViewDebAdjustment, middleware.PermissionMiddleware(permission.ViewDebAdjustment), deptadjustmentcontroller.Get)
 		auth.POST(route.AddDebAdjustment, middleware.PermissionMiddleware(permission.AddDebAdjustment), deptadjustmentcontroller.Create)
+
+		// CustomerLedger
+		auth.GET(route.ViewCustomerledger, middleware.PermissionMiddleware(permission.ViewCustomerledger), customerledgercontroller.Get)
 	}
 }

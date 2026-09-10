@@ -22,7 +22,7 @@
             <el-icon size="26" color="#8E44AD">
               <List />
             </el-icon>
-            <span>កត់អ្នកជំពាក់</span>
+            <span>វិក័យបត្រ</span>
           </div>
           <div class="action-btn" @click="$router.push('/Payment')">
             <el-icon size="26" color="#67C23A">
@@ -30,17 +30,29 @@
             </el-icon>
             <span>សង់លុយ</span>
           </div>
+          <div class="action-btn" @click="$router.push('/Refund')">
+            <el-icon size="26" color="#67C23A">
+              <Refresh />
+            </el-icon>
+            <span>សង់ប្រាក់អតិថិជនវិញ</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/Debtadjustment')">
+            <el-icon size="26" color="#67C23A">
+              <Edit />
+            </el-icon>
+            <span>កែបំណុល</span>
+          </div>
           <div class="action-btn" @click="$router.push('/company')">
             <el-icon size="26" color="#e6a23c">
               <School />
             </el-icon>
             <span>ក្រុមហ៑ុន</span>
           </div>
-          <div class="action-btn" @click="$router.push('/company')">
+          <div class="action-btn" @click="$router.push('/Customerledger')">
             <el-icon size="26" color="#f56c6c">
               <OfficeBuilding />
             </el-icon>
-            <span>សាខាតាមក្រុមហ៑ុន</span>
+            <span>បញ្ជីបំណុលអតិថិជន</span>
           </div>
         </div>
       </el-card>

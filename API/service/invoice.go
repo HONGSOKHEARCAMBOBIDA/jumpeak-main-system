@@ -210,6 +210,8 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 		return s.db.WithContext(ctx).
 			Table("invoices i").
 			Joins("LEFT JOIN customers c ON c.id = i.customer_id").
+			Joins("LEFT JOIN companies cp ON cp.id = i.company_id").
+			Joins("LEFT JOIN branches b ON b.id = i.branch_id").
 			Where("i.company_id = ?", user.CompanyID)
 	}
 
@@ -248,7 +250,10 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 		i.total_amount AS total_amount,
 		i.paid_amount AS paid_amount,
 		i.outstanding_amount AS outstanding_amount,
-		i.status AS status
+		i.status AS status,
+		i.cancel_reason AS cancel_reason,
+		cp.name AS company_Name,
+		b.name AS branch_Name
 	`)
 
 	if err := dataQuery.Order("i.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
@@ -258,6 +263,38 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 	for i := range data {
 		data[i].InvoiceDate = helper.FormatDate(data[i].InvoiceDate)
 		data[i].DueDate = helper.FormatDate(data[i].DueDate)
+		data[i].CurrencyCode = helper.Currency(data[i].CurrencyCode)
+	}
+
+	invoiceIDs := make([]int, len(data))
+	for i, a := range data {
+		invoiceIDs[i] = int(a.ID)
+	}
+
+	var invoiceitems []response.InvoiceItemResponse
+	if err := s.db.WithContext(ctx).Table("invoice_items ii").
+		Joins("LEFT JOIN products p ON p.id = ii.product_id").
+		Where("ii.invoice_id IN ?", invoiceIDs).
+		Select(`
+		ii.invoice_id AS invoice_id,
+		ii.id AS id,
+		p.id AS product_id,
+		p.name AS product_Name,
+		ii.description AS description,
+		ii.quantity AS quantity,
+		ii.unit_price AS unit_price,
+		ii.discount_amount AS discount_amount,
+		ii.subtotal AS subtotal
+	`).Scan(&invoiceitems).Error; err != nil {
+		return nil, nil, fmt.Errorf("fetch invoice items: %w", err)
+	}
+
+	itembyinvoice := make(map[uint64][]response.InvoiceItemResponse, len(data))
+	for _, i := range invoiceitems {
+		itembyinvoice[i.InvoiceID] = append(itembyinvoice[i.InvoiceID], i)
+	}
+	for i := range data {
+		data[i].InvoiceItemResponse = itembyinvoice[data[i].ID]
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

@@ -129,6 +129,8 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("debt_adjustments d").
+			Joins("LEFT JOIN invoices i ON i.id = d.invoice_id").
+			Joins("LEFT JOIN customers c ON c.id = d.customer_id").
 			Where("d.company_id = ?", user.CompanyID)
 	}
 
@@ -158,11 +160,17 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 		d.amount AS amount,
 		d.reason AS reason,
 		d.approved_by AS approved_by,
-		d.created_at AS created_at
+		d.created_at AS created_at,
+		c.name AS customer_name,
+		i.invoice_number AS invoice_number
 	`)
 
 	if err := dataQuery.Order("d.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch debt adjustments: %w", err)
+	}
+
+	for i := range data {
+		data[i].CreatedAt = helper.FormatDate(data[i].CreatedAt)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

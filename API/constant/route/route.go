@@ -48,12 +48,12 @@ const (
 	// Invoice
 	ViewInvoice   = "view.Invoice"
 	AddInvoice    = "add.Invoice"
-	CancelInvoice = "Cancel.Invoice"
+	CancelInvoice = "Cancel.Invoice/:id"
 
 	// Payment
 	ViewPayment = "view.Payment"
 	AddPayment  = "add.Payment"
-	VoidPayment = "Void.Payment"
+	VoidPayment = "Void.Payment/:id"
 
 	// DebAdjustment
 	ViewDebAdjustment = "view.DebAdjustment"
@@ -62,4 +62,7 @@ const (
 	// Refund
 	ViewRefund = "view.Refund"
 	AddRefund  = "add.Refund"
+
+	// Customerledger
+	ViewCustomerledger = "view.Customerledger"
 )

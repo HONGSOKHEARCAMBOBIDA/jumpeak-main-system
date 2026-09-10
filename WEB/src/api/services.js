@@ -76,10 +76,14 @@ export const voidpayment = (id,data) => api.put(`/Void.Payment/${id}`,data)
 
 // DebAdjustment
 
-export const getDebAdjustment = (params) => api.get(`/view.DebAdjustment`,{params})
-export const addDebAdjustment = (data) => api.post('/add.DebAdjustment',data)
+export const getdebtadjustment = (params) => api.get(`/view.DebAdjustment`,{params})
+export const adddebtadjustment = (data) => api.post('/add.DebAdjustment',data)
 
 // Refund
 
-export const getRefund = (params) => api.get(`/view.Refund`,{params})
-export const addRefund = (data) => api.post('/add.Refund',data)
+export const getrefund = (params) => api.get(`/view.Refund`,{params})
+export const addrefund = (data) => api.post('/add.Refund',data)
+
+// Customerledger
+
+export const getcustomerledger = (params) => api.get(`/view.Customerledger`,{params})

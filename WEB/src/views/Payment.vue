@@ -268,6 +268,7 @@ onMounted(() => {
           :options="customerOptions"
           label="អតិថិជន"
           placeholder="អតិថិជន"
+          size="large"
           filterable
           remote
           :remote-method="searchCustomers"
@@ -281,6 +282,7 @@ onMounted(() => {
           v-model="filters.status"
           :options="StatusOption"
           label="ស្ថានភាព"
+          size="large"
           placeholder="ស្ថានភាព"
           clearable
           @change="fetchPayments"
@@ -291,6 +293,7 @@ onMounted(() => {
           v-model="filters.method"
           :options="MethodOption"
           label="មធ្យោបាយបង់ប្រាក់"
+          size="large"
           placeholder="មធ្យោបាយបង់ប្រាក់"
           clearable
           @change="fetchPayments"
@@ -302,7 +305,7 @@ onMounted(() => {
           type="primary"
           @click="openCreate"
           :block="false"
-          size="default"
+          size="large"
         >
           បង្កើតការទូទាត់
         </AppButton>
@@ -325,6 +328,7 @@ onMounted(() => {
           { prop: 'method', label: 'មធ្យោបាយ', width: 110 },
           { prop: 'reference_number', label: 'លេខយោង', width: 120 },
           { label: 'ស្ថានភាព', slot: 'status', width: 110 },
+          { label: 'សម្គាល់', prop: 'note', width: 110 },
         ]"
       >
         <template #amount="{ row }">

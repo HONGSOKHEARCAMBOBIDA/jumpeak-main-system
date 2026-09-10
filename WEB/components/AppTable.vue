@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="app-table"
-    :style="{ '--brand-color': '#4589ce' }"
-  >
+  <div class="app-table" :style="{ '--brand-color': '#4589ce' }">
     <el-table
       v-if="!isMobile"
       ref="tableRef"
@@ -21,15 +18,11 @@
         :label="indexLabel"
         width="70"
       />
-<el-table-column
-  v-if="expandable"
-  type="expand"
-  width="50"
->
-  <template #default="scope">
-    <slot name="expand" v-bind="scope" />
-  </template>
-</el-table-column>
+      <el-table-column v-if="expandable" type="expand" width="50">
+        <template #default="scope">
+          <slot name="expand" v-bind="scope" />
+        </template>
+      </el-table-column>
       <el-table-column
         v-for="col in columns"
         :key="col.prop || col.label"
@@ -111,7 +104,7 @@ const props = defineProps({
   total: { type: Number, default: 0 },
   tableProps: { type: Object, default: () => ({}) },
   selectable: { type: Boolean, default: false },
-   expandable: {
+  expandable: {
     type: Boolean,
     default: false,
   },

@@ -115,4 +115,8 @@ var Permissions = []model.Permission{
 		Name:        "add.Refund",
 		DisplayName: "add.Refund",
 	},
+	{
+		Name:        "view.Customerledger",
+		DisplayName: "view.Customerledger",
+	},
 }

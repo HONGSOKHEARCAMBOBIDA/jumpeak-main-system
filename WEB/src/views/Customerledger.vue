@@ -100,6 +100,7 @@ onMounted(() => {
           :options="customerOptions"
           label="អតិថិជន"
           placeholder="ជ្រើសរើសអតិថិជន"
+          size="large"
           filterable
           remote
           :remote-method="searchCustomers"
@@ -113,6 +114,7 @@ onMounted(() => {
           v-model="filters.reference_type"
           :options="ReferenceTypeOption"
           label="ប្រភេទ"
+          size="large"
           placeholder="ប្រភេទប្រតិបត្តិការ"
           clearable
           @change="onFilterChange"

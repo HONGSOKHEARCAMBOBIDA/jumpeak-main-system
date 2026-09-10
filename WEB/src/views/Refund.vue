@@ -231,6 +231,7 @@ onMounted(() => {
           :options="customerOptions"
           label="អតិថិជន"
           placeholder="អតិថិជន"
+          size="large"
           filterable
           remote
           :remote-method="searchCustomers"
@@ -245,7 +246,7 @@ onMounted(() => {
           type="primary"
           @click="openCreate"
           :block="false"
-          size="default"
+          size="large"
         >
           បង្កើតការត្រឡប់ប្រាក់
         </AppButton>
@@ -274,7 +275,7 @@ onMounted(() => {
       </AppTable>
     </el-card>
 
-    <AppDialog v-model="dialogVisible" title="បង្កើតការត្រឡប់ប្រាក់" width="680px" :showDefaultFooter="false">
+    <AppDialog v-model="dialogVisible" title="បង្កើតការត្រឡប់ប្រាក់" width="45%" :showDefaultFooter="false">
       <AppForm
         ref="formRef"
         :model="form"
@@ -287,6 +288,7 @@ onMounted(() => {
           v-model="form.customer_id"
           :options="customerOptions"
           label="អតិថិជន"
+          size="large"
           prop="customer_id"
           placeholder="ជ្រើសរើសអតិថិជន"
           filterable
@@ -300,6 +302,7 @@ onMounted(() => {
           v-model="form.payment_id"
           :options="paymentOptions"
           label="ការទូទាត់ដើម"
+          size="large"
           prop="payment_id"
           placeholder="ជ្រើសរើសការទូទាត់"
           :loading="paymentsLoading"
@@ -325,6 +328,7 @@ onMounted(() => {
                 <AppSelect
                   v-model="row.invoice_id"
                   :options="paidInvoiceOptions"
+                   size="large"
                   placeholder="ជ្រើសរើសវិក័យបត្រ"
                   :loading="invoicesLoading"
                   clearable
@@ -348,7 +352,7 @@ onMounted(() => {
         </div>
 
         <div class="item-actions">
-          <AppButton size="small" type="default" icon="Plus" @click="addAllocationRow">
+          <AppButton size="default" type="default" icon="Plus" @click="addAllocationRow">
             បន្ថែមការបែងចែក
           </AppButton>
           <el-text tag="b" :type="allocationDiff !== 0 ? 'danger' : 'success'">
@@ -376,5 +380,6 @@ onMounted(() => {
   align-items: center;
   justify-content: space-between;
   margin-top: 12px;
+  margin-bottom: 10px;
 }
 </style>

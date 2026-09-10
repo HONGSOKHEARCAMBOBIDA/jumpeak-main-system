@@ -60,6 +60,8 @@ var requiredPermissions = []string{
 	"Cancel.Invoice",
 	"add.Payment",
 	"Void.Payment",
+	"add.Refund",
+	"add.DebAdjustment",
 }
 
 func (s *authservice) GetRole(ctx context.Context, id int) ([]model.Role, error) {

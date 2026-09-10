@@ -11,6 +11,7 @@ import (
 	"mysql/request"
 	"mysql/response"
 	"mysql/utils"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -61,12 +62,15 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 		if payment.Status != model.PaymentStatusCompleted {
 			return apperror.New(apperror.CodeInvalidInput, "only completed payments can be refunded", nil)
 		}
-
+		refundat, err := time.Parse("2006-01-02", input.RefundedAt)
+		if err != nil {
+			return err
+		}
 		newdata := model.Refund{
 			PaymentID:  payment.ID,
 			Amount:     input.Amount,
 			Reason:     input.Reason,
-			RefundedAt: input.RefundedAt,
+			RefundedAt: refundat,
 			CreatedBy:  uint64Ptr(uint64(userID)),
 		}
 		if err := tx.Create(&newdata).Error; err != nil {
@@ -115,7 +119,7 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 		}
 
 		if err := helper.AppendLedgerEntry(
-			tx, payment.CompanyID, payment.CustomerID, input.RefundedAt,
+			tx, payment.CompanyID, payment.CustomerID, refundat,
 			model.CustomerLedgerReferenceRefund, uint64(newdata.ID),
 			fmt.Sprintf("Refund against payment %s: %s", payment.PaymentNumber, input.Reason),
 			input.Amount, 0,
@@ -143,7 +147,8 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("refunds r").
-			Joins("LEFT JOIN payments p ON p.id = r.payment_id")
+			Joins("LEFT JOIN payments p ON p.id = r.payment_id").
+			Joins("LEFT JOIN customers c ON c.id = p.customer_id")
 	}
 
 	applyFilters := func(tx *gorm.DB) *gorm.DB {
@@ -166,11 +171,17 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 		r.payment_id AS payment_id,
 		r.amount AS amount,
 		r.reason AS reason,
-		r.refunded_at AS refunded_at
+		r.refunded_at AS refunded_at,
+		c.name AS customer_name,
+		p.payment_number AS payment_number
 	`)
 
 	if err := dataQuery.Order("r.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch refunds: %w", err)
+	}
+
+	for i := range data {
+		data[i].RefundedAt = helper.FormatDate(data[i].RefundedAt)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

@@ -45,7 +45,7 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
-			Table("customer_ledgers l").
+			Table("customer_ledger l").
 			Joins("LEFT JOIN customers c ON c.id = l.customer_id").
 			Where("l.company_id = ?", user.CompanyID)
 	}
@@ -91,6 +91,10 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 	// like a statement of account; reverse in the UI if a "latest first" view is wanted.
 	if err := dataQuery.Order("l.entry_date ASC").Order("l.id ASC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch customer ledger: %w", err)
+	}
+
+	for i := range data {
+		data[i].EntryDate = helper.FormatDate(data[i].EntryDate)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

@@ -49,4 +49,7 @@ const (
 	// Refund
 	ViewRefund = "view.Refund"
 	AddRefund  = "add.Refund"
+
+	// Customerledger
+	ViewCustomerledger = "view.Customerledger"
 )

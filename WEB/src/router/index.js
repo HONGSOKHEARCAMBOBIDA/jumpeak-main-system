@@ -85,6 +85,21 @@ const routes = [
         component: () => import("../views/Payment.vue"),
       },
       {
+        path: "Refund",
+        name: "Refund",
+        component: () => import("../views/Refund.vue"),
+      },
+      {
+        path: "Debtadjustment",
+        name: "Debtadjustment",
+        component: () => import("../views/Debtadjustment.vue"),
+      },
+      {
+        path: "Customerledger",
+        name: "Customerledger",
+        component: () => import("../views/Customerledger.vue"),
+      },
+      {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: () => import("../views/NotFound.vue"),

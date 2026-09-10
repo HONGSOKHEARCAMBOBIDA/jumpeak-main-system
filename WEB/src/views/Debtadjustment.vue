@@ -112,7 +112,7 @@ const invoiceOutstanding = computed(
 );
 
 const canAddAdjustment = computed(() =>
-  userDataStore.permissions?.some((p) => p.name === "add.DebtAdjustment"),
+  userDataStore.permissions?.some((p) => p.name === "add.DebAdjustment"),
 );
 
 async function fetchAdjustments() {
@@ -191,6 +191,7 @@ onMounted(() => {
           v-model="filters.customer_id"
           :options="customerOptions"
           label="អតិថិជន"
+          size="large"
           placeholder="អតិថិជន"
           filterable
           remote
@@ -205,6 +206,7 @@ onMounted(() => {
           v-model="filters.type"
           :options="TypeOption"
           label="ប្រភេទ"
+           size="large"
           placeholder="ប្រភេទ"
           clearable
           @change="fetchAdjustments"
@@ -216,7 +218,7 @@ onMounted(() => {
           type="primary"
           @click="openCreate"
           :block="false"
-          size="default"
+           size="large"
         >
           បង្កើតការកែសម្រួលបំណុល
         </AppButton>
@@ -270,6 +272,7 @@ onMounted(() => {
           prop="customer_id"
           placeholder="ជ្រើសរើសអតិថិជន"
           filterable
+          size="large"
           remote
           :remote-method="searchCustomers"
           :loading="customerSearching"
@@ -280,6 +283,7 @@ onMounted(() => {
           v-model="form.invoice_id"
           :options="openInvoiceOptions"
           label="វិក័យបត្រ (ស្រេចចិត្ត)"
+          size="large"
           placeholder="ជ្រើសរើសវិក័យបត្រ បើមាន"
           :loading="invoicesLoading"
           clearable
@@ -287,14 +291,14 @@ onMounted(() => {
 
         <el-row :gutter="16">
           <el-col :span="12">
-            <AppSelect v-model="form.type" :options="TypeOption" label="ប្រភេទ" prop="type" />
+            <AppSelect v-model="form.type" :options="TypeOption" size="large" label="ប្រភេទ" prop="type" />
           </el-col>
           <el-col :span="12">
-            <AppInput v-model.number="form.amount" label="ចំនួន" prop="amount" type="number" />
+            <AppInput v-model.number="form.amount" label="ចំនួន" size="large" prop="amount" type="number" />
           </el-col>
         </el-row>
 
-        <AppInput v-model="form.reason" label="មូលហេតុ" prop="reason" type="textarea" placeholder="បញ្ចូលមូលហេតុ" />
+        <AppInput v-model="form.reason" label="មូលហេតុ" prop="reason" size="large" type="textarea" placeholder="បញ្ចូលមូលហេតុ" />
       </AppForm>
     </AppDialog>
   </div>

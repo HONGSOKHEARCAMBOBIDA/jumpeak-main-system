@@ -189,6 +189,7 @@ func (s *paymentservice) Void(ctx context.Context, id int, userID int, input req
 		}
 
 		payment.Status = model.PaymentStatusVoided
+		payment.Note = &input.Reason
 		if err := tx.Save(&payment).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to void payment", nil)
 		}
@@ -264,6 +265,7 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 		p.amount AS amount,
 		p.method AS method,
 		p.reference_number AS reference_number,
+		p.note AS note,
 		p.status AS status
 	`)
 
