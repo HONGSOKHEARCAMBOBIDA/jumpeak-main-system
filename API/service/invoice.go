@@ -274,8 +274,10 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 	var invoiceitems []response.InvoiceItemResponse
 	if err := s.db.WithContext(ctx).Table("invoice_items ii").
 		Joins("LEFT JOIN products p ON p.id = ii.product_id").
+		Joins("LEFT JOIN invoices i ON i.id = ii.invoice_id").
 		Where("ii.invoice_id IN ?", invoiceIDs).
 		Select(`
+		i.currency_code AS currency_code,
 		ii.invoice_id AS invoice_id,
 		ii.id AS id,
 		p.id AS product_id,
@@ -287,6 +289,10 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 		ii.subtotal AS subtotal
 	`).Scan(&invoiceitems).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch invoice items: %w", err)
+	}
+
+	for i := range invoiceitems {
+		invoiceitems[i].CurrencyCode = helper.Currency(invoiceitems[i].CurrencyCode)
 	}
 
 	itembyinvoice := make(map[uint64][]response.InvoiceItemResponse, len(data))

@@ -52,9 +52,9 @@ const StatusOption = [
 const invoiceitemcolumns = [
   { prop: "product_Name", label: "មុខទំនិញ", minwidth: 120 },
   { prop: "quantity", label: "ចំនួន", minwidth: 120 },
-  { prop: "unit_price", label: "តម្លៃរាយ", minwidth: 120 },
-  { prop: "discount_amount", label: "បញ្ចុះតម្លៃ", minwidth: 120 },
-  { prop: "subtotal", label: "តម្លៃសរុប", minwidth: 120 },
+  { slot: "unit_price", label: "តម្លៃរាយ", minwidth: 120 },
+  { slot: "discount_amount", label: "បញ្ចុះតម្លៃ", minwidth: 120 },
+  { slot: "subtotal", label: "តម្លៃសរុប", minwidth: 120 },
   { prop: "description", label: "ផ្សេងៗ", minwidth: 120 },
 ];
 const printableRef = ref(null)
@@ -73,6 +73,7 @@ const branchname = ref("")
 const total_amount = ref(null)
 const paid_amount = ref(null)
 const outstanding_amount = ref(null)
+const customer = ref("")
 const currency = ref("")
 function printInvoiceList(invoice, invoiceitem) {
   printRows.value = invoice.invoice_item || []
@@ -82,6 +83,7 @@ function printInvoiceList(invoice, invoiceitem) {
   total_amount.value = invoice.total_amount || 0
   currency.value = invoice.currency_code || 0
   paid_amount.value = invoice.paid_amount || 0
+  customer.value = invoice.customer_name || ""
   outstanding_amount.value = invoice.outstanding_amount
   nextTick(() => {
     printableRef.value?.print()
@@ -134,22 +136,7 @@ async function searchProducts(query) {
   }
 }
 
-const branchOptions = ref([]);
-async function loadBranchOptionsForCompany(companyId) {
-  if (!companyId) {
-    branchOptions.value = [];
-    return;
-  }
-  try {
-    const res = await getbranchnopagination(companyId);
-    branchOptions.value = (res.data.data || []).map((b) => ({
-      label: b.name,
-      value: b.id,
-    }));
-  } catch (e) {
-    notify.error(e?.response?.data?.error || "Failed to load branch");
-  }
-}
+
 
 // --- create form ---
 function blankItem() {
@@ -242,12 +229,11 @@ async function fetchInvoices() {
 function openCreate() {
   form.customer_id = null;
   form.branch_id = null;
-  form.invoice_date = "";
+  form.invoice_date = new Date().toISOString().split('T')[0];
   form.due_date = "";
   form.currency_code = "KHR";
   form.exchange_rate_to_base = 1;
   items.value = [blankItem()];
-  branchOptions.value = [];
   searchCustomers("");
   searchProducts("");
   dialogVisible.value = true;
@@ -458,7 +444,7 @@ onMounted(() => {
                     ? 'warning'
                     : 'primary'
             "
-            size="small"
+            size="defualt"
           >
             {{ getStatusLabel(row.status) }}
           </el-text>
@@ -488,7 +474,7 @@ onMounted(() => {
         </template>
         <template #expand="{ row: item }">
           <el-divider content-position="left">
-            <el-text> លំអិត </el-text>
+            <el-text> លំអិតវិក័យបត្រ </el-text>
           </el-divider>
           <AppTable
             expandable
@@ -496,6 +482,15 @@ onMounted(() => {
             :columns="invoiceitemcolumns"
             :show-pagination="false"
           >
+          <template #unit_price="{row:item}">
+            <el-text>{{ item.unit_price }}{{ item.currency_code }}</el-text>
+          </template>
+          <template #discount_amount="{row:item}">
+            <el-text>{{ item.discount_amount }}{{ item.currency_code }}</el-text>
+          </template>
+          <template #subtotal="{row:item}">
+            <el-text>{{ item.subtotal }}{{ item.currency_code }}</el-text>
+          </template>
           </AppTable>
         </template>
       </AppTable>
@@ -515,33 +510,7 @@ onMounted(() => {
         @submit="handleSave"
         submitText="រក្សាទុក"
       >
-        <el-row :gutter="16">
-          <!-- <el-col :span="12">
-            <AppSelect
-              v-model="form.customer_id"
-              :options="customerOptions"
-              label="អតិថិជន"
-              prop="customer_id"
-              size="large"
-              placeholder="ជ្រើសរើសអតិថិជន"
-              filterable
-              remote
-              :remote-method="searchCustomers"
-              :loading="customerSearching"
-           
-            />
-          </el-col> -->
-          <el-col :span="12">
-            <!-- <AppSelect
-              v-model="form.branch_id"
-              :options="branchOptions"
-              label="សាខា"
-              prop="branch_id"
-              size="large"
-              placeholder="ជ្រើសរើសសាខា"
-            /> -->
-          </el-col>
-        </el-row>
+     
 
         <el-row :gutter="16">
           <el-col :span="8">
@@ -636,8 +605,8 @@ onMounted(() => {
                 <AppInput
                   v-model.number="row.unit_price"
                   type="number"
-                  placeholder="តម្លៃឯកតា"
-                  label="តម្លៃឯកតា"
+                  placeholder="តម្លៃរាយ"
+                  label="តម្លៃរាយ"
                 />
               </el-col>
               <el-col :span="3">
@@ -716,6 +685,7 @@ onMounted(() => {
   :currency="`${currency}`"
   :paid_amount="`${paid_amount}`"
   :outstanding_amount="`${outstanding_amount}`"
+  :customer="`${customer}`"
   :columns="invoiceitemPrintcolumns"
   :rows="printRows"
 />

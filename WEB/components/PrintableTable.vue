@@ -17,7 +17,10 @@
           <h3 class="title-doc">{{ title }}</h3>
         </el-col>
 
-        <el-col :span="4"></el-col>
+        <el-col :span="4">
+          <h4 class="title-doc">អតិថិជន</h4>
+           <h3 class="title-doc">{{ customer }}</h3>
+        </el-col>
       </el-row>
 
       <table>
@@ -83,6 +86,10 @@ defineProps({
   },
   outstanding_amount: {
     type: Number,
+    default: "",
+  },
+  customer: {
+    type: String,
     default: "",
   },
   columns: {
