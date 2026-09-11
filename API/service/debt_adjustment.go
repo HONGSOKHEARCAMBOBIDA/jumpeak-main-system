@@ -98,7 +98,7 @@ func (s *debtadjustmentservice) Create(ctx context.Context, userID int, input re
 		if err := helper.AppendLedgerEntry(
 			tx, user.CompanyID, input.CustomerID, time.Now(),
 			model.CustomerLedgerReferenceAdjustment, uint64(newdata.ID),
-			fmt.Sprintf("%s: %s", adjType, input.Reason),
+			fmt.Sprintf("កែបំណុល %s: %s", adjType, input.Reason),
 			0, input.Amount,
 		); err != nil {
 			return err
@@ -129,7 +129,10 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("debt_adjustments d").
+			Joins("LEFT JOIN users u ON u.id = d.approved_by").
 			Joins("LEFT JOIN invoices i ON i.id = d.invoice_id").
+			Joins("LEFT JOIN companies cp ON cp.id = i.company_id").
+			Joins("LEFT JOIN branches b ON b.id = i.branch_id").
 			Joins("LEFT JOIN customers c ON c.id = d.customer_id").
 			Where("d.company_id = ?", user.CompanyID)
 	}
@@ -162,7 +165,12 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 		d.approved_by AS approved_by,
 		d.created_at AS created_at,
 		c.name AS customer_name,
-		i.invoice_number AS invoice_number
+		i.invoice_number AS invoice_number,
+		i.currency_code AS currency,
+		cp.name AS company_Name,
+		b.name AS branch_Name,
+		b.code AS branch_Code,
+		u.name AS approved_by
 	`)
 
 	if err := dataQuery.Order("d.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
@@ -171,6 +179,7 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 
 	for i := range data {
 		data[i].CreatedAt = helper.FormatDate(data[i].CreatedAt)
+		data[i].Currency = helper.Currency(data[i].Currency)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

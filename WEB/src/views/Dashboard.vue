@@ -2,9 +2,6 @@
   <div class="dashboard">
     <div class="dash-grid">
       <el-card class="dash-card">
-        <template #header
-          ><span class="card-title">សកម្មភាពរហ័ស</span></template
-        >
         <div class="action-grid">
           <div class="action-btn" @click="$router.push('/customer')">
             <el-icon size="26" color="#409eff">
@@ -16,7 +13,7 @@
             <el-icon size="26" color="#67c23a">
               <Clock />
             </el-icon>
-            <span>ឥវ៉ាន់ទាំងអស់</span>
+            <span>មុខទំនិញ</span>
           </div>
           <div class="action-btn" @click="$router.push('/invoice')">
             <el-icon size="26" color="#8E44AD">
@@ -50,7 +47,7 @@
           </div>
           <div class="action-btn" @click="$router.push('/Customerledger')">
             <el-icon size="26" color="#f56c6c">
-              <OfficeBuilding />
+              <Notebook />
             </el-icon>
             <span>បញ្ជីបំណុលអតិថិជន</span>
           </div>

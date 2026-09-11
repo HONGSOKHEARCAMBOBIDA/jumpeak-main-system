@@ -3,6 +3,10 @@ package response
 type PaymentResponse struct {
 	ID                 uint64  `json:"id"`
 	CompanyID          uint64  `json:"company_id"`
+	CompanyName        string  `json:"company_Name"`
+	BranchID           uint64  `json:"branch_id"`
+	BranchName         string  `json:"branch_Name"`
+	BranchPhone        string  `json:"branch_phone"`
 	CustomerID         uint64  `json:"customer_id"`
 	CustomerName       string  `json:"customer_name"`
 	PaymentNumber      string  `json:"payment_number"`
@@ -14,4 +18,5 @@ type PaymentResponse struct {
 	ReferenceNumber    *string `json:"reference_number,omitempty"`
 	Note               string  `json:"note"`
 	Status             string  `json:"status"`
+	CreatedBy          string  `json:"create_by" gorm:"column:create_by"`
 }

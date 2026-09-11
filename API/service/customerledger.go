@@ -47,6 +47,8 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 		return s.db.WithContext(ctx).
 			Table("customer_ledger l").
 			Joins("LEFT JOIN customers c ON c.id = l.customer_id").
+			Joins("LEFT JOIN companies cp ON cp.id = c.company_id").
+			Joins("LEFT JOIN branches b ON b.id = c.branch_id").
 			Where("l.company_id = ?", user.CompanyID)
 	}
 
@@ -84,7 +86,10 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 		l.description AS description,
 		l.debit AS debit,
 		l.credit AS credit,
-		l.running_balance AS running_balance
+		l.running_balance AS running_balance,
+		cp.name AS company_Name,
+		b.name AS branch_Name,
+		b.code AS branch_Code
 	`)
 
 	// Chronological order (oldest first) so the running balance reads top-to-bottom

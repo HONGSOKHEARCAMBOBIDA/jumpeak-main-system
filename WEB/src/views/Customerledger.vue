@@ -13,7 +13,7 @@ const entries = ref([]);
 const loading = ref(false);
 
 const page = ref(1);
-const pageSize = ref(20);
+const pageSize = ref(10);
 const total = ref(0);
 
 // filters
@@ -25,12 +25,15 @@ const filters = reactive({
 });
 
 const ReferenceTypeOption = [
-  { label: "INVOICE", value: "INVOICE" },
-  { label: "PAYMENT", value: "PAYMENT" },
-  { label: "REFUND", value: "REFUND" },
-  { label: "ADJUSTMENT", value: "ADJUSTMENT" },
+  { label: "វិក្កយបត្រ", value: "INVOICE" },
+  { label: "ការសងប្រាក់", value: "PAYMENT" },
+  { label: "បង់ប្រាក់ទៅអតិថិជនវិញ", value: "REFUND" },
+  { label: "កែបំណុល", value: "ADJUSTMENT" },
 ];
 
+const ReferenceTypeLabel = (status) => {
+  return ReferenceTypeOption.find((item) => item.value === status)?.label || status;
+};
 // --- customer remote search ---
 const customerOptions = ref([]);
 const customerSearching = ref(false);
@@ -129,7 +132,7 @@ onMounted(() => {
     </AppFilterBar>
 
     <el-card v-if="filters.customer_id && currentBalance !== null" class="balance-card">
-      <el-text>សមតុល្យបច្ចុប្បន្ន (ក្នុងទំព័រនេះ): </el-text>
+      <el-text>ប្រាក់ជំពាក់នៅសល់ : </el-text>
       <el-text tag="b" size="large" :type="currentBalance > 0 ? 'danger' : 'success'">
         {{ currentBalance }}
       </el-text>
@@ -144,17 +147,22 @@ onMounted(() => {
         :total="total"
         @page-change="fetchEntries"
         :columns="[
-          { prop: 'entry_date', label: 'កាលបរិច្ឆេទ', width: 120 },
-          { prop: 'customer_name', label: 'អតិថិជន', minWidth: 150 },
-          { label: 'ប្រភេទ', slot: 'reference_type', width: 120 },
+          { prop: 'entry_date', label: 'កាលបរិច្ឆេទ', width: 100 },
+          { prop: 'customer_name', label: 'អតិថិជន', minWidth: 80 },
+          { prop: 'company_Name', label: 'ក្រុមហ៑ុន', Width: 150 },
+          { slot: 'branch_Name', label: 'សាខា', Width: 200 },
+          { label: 'ប្រភេទ', slot: 'reference_type', width: 140 },
           { prop: 'description', label: 'បរិយាយ', minWidth: 200 },
-          { slot: 'debit', label: 'ជំពាក់ (Debit)', width: 130 },
-          { slot: 'credit', label: 'បង់ (Credit)', width: 130 },
-          { slot: 'running_balance', label: 'សមតុល្យបន្ត', width: 140 },
+          { slot: 'debit', label: 'ជំពាក់កើន (Debit)', width: 150 },
+          { slot: 'credit', label: 'បង់កើន (Credit)', width: 150 },
+          { slot: 'running_balance', label: 'ប្រាក់ជំពាក់នៅសល់', width: 140 },
         ]"
       >
+      <template #branch_Name="{row}">
+        <el-text>{{ row.branch_Name }} | <el-text size="small" type="primary">{{ row.branch_Code }}</el-text></el-text>
+      </template>
         <template #reference_type="{ row }">
-          <el-text size="small" type="info">{{ row.reference_type }}</el-text>
+          <el-text size="small" type="primary">{{ ReferenceTypeLabel(row.reference_type) }}</el-text>
         </template>
         <template #debit="{ row }">
           <el-text v-if="row.debit > 0" type="danger">{{ row.debit }}</el-text>
@@ -165,7 +173,7 @@ onMounted(() => {
           <el-text v-else type="info">—</el-text>
         </template>
         <template #running_balance="{ row }">
-          <el-text tag="b">{{ row.running_balance }}</el-text>
+          <el-text tag="b" style="color: black;">{{ row.running_balance }}</el-text>
         </template>
       </AppTable>
     </el-card>

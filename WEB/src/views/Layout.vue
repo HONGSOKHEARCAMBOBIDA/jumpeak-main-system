@@ -7,7 +7,7 @@
         </el-icon>
 
         <span v-if="!collapsed" class="brand">
-          ប្រព័ន្ធគ្រប់គ្រងធនធានមនុស្ស
+          ប្រព័ន្ធគ្រប់គ្រងបំណុលអតិថិជន
         </span>
       </div>
 
@@ -140,7 +140,7 @@ const nav = computed(() => {
     }))
 })
 
-const pageTitle = computed(() => route.meta.title || 'HR')
+const pageTitle = computed(() => route.meta.title || '')
 
 function handleCommand(cmd) {
   if (cmd === 'logout') {

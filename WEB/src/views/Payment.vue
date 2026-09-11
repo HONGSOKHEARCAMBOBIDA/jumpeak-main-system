@@ -41,17 +41,25 @@ const filters = reactive({
 });
 
 const StatusOption = [
-  { label: "COMPLETED", value: "COMPLETED" },
-  { label: "VOIDED", value: "VOIDED" },
+  { label: "បង់រួចរាល់", value: "COMPLETED" },
+  { label: "បានលុបចោល", value: "VOIDED" },
 ];
 
+const getStatusLabel = (status) => {
+  return StatusOption.find((item) => item.value === status)?.label || status;
+};
+
 const MethodOption = [
-  { label: "CASH", value: "CASH" },
-  { label: "BANK", value: "BANK" },
+  { label: "សាច់ប្រាក់", value: "CASH" },
+  { label: "ធនាគារ", value: "BANK" },
   { label: "ABA", value: "ABA" },
   { label: "ACLEDA", value: "ACLEDA" },
-  { label: "OTHER", value: "OTHER" },
+  { label: "ផ្សេងៗ", value: "OTHER" },
 ];
+
+const getMethodLabel = (status) => {
+  return MethodOption.find((item) => item.value === status)?.label || status;
+};
 
 // --- customer remote search ---
 const customerOptions = ref([]);
@@ -167,7 +175,7 @@ async function fetchPayments() {
 
 function openCreate() {
   form.customer_id = null;
-  form.payment_date = "";
+  form.payment_date = new Date().toISOString().split('T')[0];
   form.currency_code = "KHR";
   form.exchange_rate_to_base = 1;
   form.amount = 0;
@@ -323,21 +331,30 @@ onMounted(() => {
         :columns="[
           { prop: 'payment_number', label: 'លេខបង់ប្រាក់', minWidth: 140 },
           { prop: 'customer_name', label: 'អតិថិជន', minWidth: 150 },
+           { prop: 'company_Name', label: 'ក្រុមហ៑ុន', width: 160 },
+           { slot: 'branch_Name', label: 'សាខា', width: 200 },
           { prop: 'payment_date', label: 'កាលបរិច្ឆេទ', width: 120 },
           { slot: 'amount', label: 'ចំនួនទឹកប្រាក់', width: 130 },
-          { prop: 'method', label: 'មធ្យោបាយ', width: 110 },
+          { slot: 'method', label: 'មធ្យោបាយ', width: 110 },
           { prop: 'reference_number', label: 'លេខយោង', width: 120 },
           { label: 'ស្ថានភាព', slot: 'status', width: 110 },
           { label: 'សម្គាល់', prop: 'note', width: 110 },
+          { label: 'បង់ប្រាក់ដោយ', prop: 'create_by', width: 150 },
         ]"
       >
+      <template #branch_Name="{row}">
+        <el-text>{{ row.branch_Name }} | <el-text size="small" type="primary">{{ row.branch_phone }}</el-text></el-text>
+      </template>
         <template #amount="{ row }">
           <el-text tag="b">{{ row.amount }} <el-text size="small" type="primary">{{ row.currency_code }}</el-text></el-text>
         </template>
         <template #status="{ row }">
           <el-text :type="row.status === 'COMPLETED' ? 'success' : 'info'" size="small">
-            {{ row.status }}
+            {{ getStatusLabel(row.status) }}
           </el-text>
+        </template>
+        <template #method="{row}">
+          <el-text>{{ getMethodLabel(row.method) }}</el-text>
         </template>
 
         <template #actions="{ row }">
@@ -389,10 +406,10 @@ onMounted(() => {
 
         <el-row :gutter="16">
           <el-col :span="8">
-            <AppInput v-model="form.currency_code" label="រូបិយប័ណ្ណ" prop="currency_code" placeholder="USD" />
+            <AppInput v-model="form.currency_code" label="រូបិយប័ណ្ណ" prop="currency_code" placeholder="KHR" disabled/>
           </el-col>
           <el-col :span="8">
-            <AppInput v-model.number="form.exchange_rate_to_base" label="អត្រាប្តូរប្រាក់" type="number" />
+            <AppInput v-model.number="form.exchange_rate_to_base" label="អត្រាប្តូរប្រាក់" type="number" disabled/>
           </el-col>
           <el-col :span="8">
             <AppInput v-model.number="form.amount" label="ចំនួនទឹកប្រាក់" prop="amount" type="number" />

@@ -16,6 +16,7 @@ type InvoiceResponse struct {
 	CompanyName         string                `json:"company_Name"`
 	BranchID            uint64                `json:"branch_id"`
 	BranchName          string                `json:"branch_Name"`
+	BranchPhone         string                `json:"branch_phone"`
 	CustomerID          uint64                `json:"customer_id"`
 	CustomerName        string                `json:"customer_name"`
 	InvoiceNumber       string                `json:"invoice_number"`

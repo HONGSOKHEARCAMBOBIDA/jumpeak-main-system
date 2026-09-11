@@ -121,7 +121,7 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 		if err := helper.AppendLedgerEntry(
 			tx, payment.CompanyID, payment.CustomerID, refundat,
 			model.CustomerLedgerReferenceRefund, uint64(newdata.ID),
-			fmt.Sprintf("Refund against payment %s: %s", payment.PaymentNumber, input.Reason),
+			fmt.Sprintf("បង់ប្រាក់ទៅអតិថិជនវិញ %s: %s", payment.PaymentNumber, input.Reason),
 			input.Amount, 0,
 		); err != nil {
 			return err
@@ -147,8 +147,11 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("refunds r").
+			Joins("LEFT JOIN users u ON u.id = r.created_by").
 			Joins("LEFT JOIN payments p ON p.id = r.payment_id").
-			Joins("LEFT JOIN customers c ON c.id = p.customer_id")
+			Joins("LEFT JOIN customers c ON c.id = p.customer_id").
+			Joins("LEFT JOIN companies cp ON cp.id = p.company_id").
+			Joins("LEFT JOIN branches b ON b.id = p.branch_id")
 	}
 
 	applyFilters := func(tx *gorm.DB) *gorm.DB {
@@ -173,7 +176,12 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 		r.reason AS reason,
 		r.refunded_at AS refunded_at,
 		c.name AS customer_name,
-		p.payment_number AS payment_number
+		p.payment_number AS payment_number,
+		cp.name AS company_Name,
+		p.currency_code AS currency,
+		b.name AS branch_Name,
+		b.code AS branch_Code,
+		u.name AS create_by
 	`)
 
 	if err := dataQuery.Order("r.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
@@ -182,6 +190,7 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 
 	for i := range data {
 		data[i].RefundedAt = helper.FormatDate(data[i].RefundedAt)
+		data[i].Currency = helper.Currency(data[i].Currency)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

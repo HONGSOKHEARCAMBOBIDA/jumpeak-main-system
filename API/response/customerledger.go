@@ -2,6 +2,10 @@ package response
 
 type CustomerLedgerResponse struct {
 	ID             uint64  `json:"id"`
+	CompanyName    string  `json:"company_Name"`
+	BranchName     string  `json:"branch_Name"`
+	BranchCode     string  `json:"branch_Code"`
+	Currency       string  `json:"currency"`
 	CustomerID     uint64  `json:"customer_id"`
 	CustomerName   string  `json:"customer_name"`
 	EntryDate      string  `json:"entry_date"`

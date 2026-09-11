@@ -39,10 +39,14 @@ const filters = reactive({
 });
 
 const TypeOption = [
-  { label: "WRITE_OFF", value: "WRITE_OFF" },
-  { label: "CORRECTION", value: "CORRECTION" },
-  { label: "DISCOUNT", value: "DISCOUNT" },
+  { label: "លុបបំណុល", value: "WRITE_OFF" },
+  { label: "កែតម្រូវ", value: "CORRECTION" },
+  { label: "បញ្ចុះតម្លៃ", value: "DISCOUNT" },
 ];
+
+const getTypeLabel = (status) => {
+  return TypeOption.find((item) => item.value === status)?.label || status;
+};
 
 // --- customer remote search ---
 const customerOptions = ref([]);
@@ -235,28 +239,34 @@ onMounted(() => {
         @page-change="fetchAdjustments"
         :columns="[
           { prop: 'customer_name', label: 'អតិថិជន', minWidth: 150 },
-          { prop: 'invoice_number', label: 'វិក័យបត្រ', width: 140 },
+          { prop: 'invoice_number', label: 'លេខវិក័យបត្រ', width: 140 },
+           { label: 'ក្រុមហ៑ុន', prop: 'company_Name', width: 180 },
+            { label: 'សាខា', slot: 'branch_Name', width: 200 },
           { label: 'ប្រភេទ', slot: 'type', width: 120 },
           { slot: 'amount', label: 'ចំនួន', width: 120 },
           { prop: 'reason', label: 'មូលហេតុ', minWidth: 160 },
           { prop: 'created_at', label: 'កាលបរិច្ឆេទ', width: 150 },
+          { prop: 'approved_by', label: 'កែបំណុលដោយ', width: 200 },
         ]"
       >
+      <template #branch_Name="{row}">
+        <el-text>{{ row.branch_Name }} | <el-text size="small" type="primary">{{ row.branch_Code }}</el-text></el-text>
+      </template>
         <template #type="{ row }">
           <el-text
             :type="row.type === 'WRITE_OFF' ? 'danger' : row.type === 'DISCOUNT' ? 'warning' : 'info'"
             size="small"
           >
-            {{ row.type }}
+            {{ getTypeLabel(row.type) }}
           </el-text>
         </template>
         <template #amount="{ row }">
-          <el-text tag="b" type="danger">{{ row.amount }}</el-text>
+          <el-text tag="b" type="danger">{{ row.amount }} <el-text size="small" type="primary">{{ row.currency }}</el-text></el-text>
         </template>
       </AppTable>
     </el-card>
 
-    <AppDialog v-model="dialogVisible" title="បង្កើតការកែសម្រួលបំណុល" width="520px" :showDefaultFooter="false">
+    <AppDialog v-model="dialogVisible" title="បង្កើតការកែសម្រួលបំណុល" width="40%" :showDefaultFooter="false">
       <AppForm
         ref="formRef"
         :model="form"

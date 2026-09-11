@@ -128,6 +128,7 @@ func (s *companyservice) Get(ctx context.Context, userID int, pf request.Paginat
 			b.name AS name,
 			b.code AS code,
 			b.address AS address,
+			b.phone AS phone,
 			b.status AS status
 		`)
 	branchquery = helper.ApplyAccessFilter(branchquery, s.db, user.Role, user)

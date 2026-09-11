@@ -127,7 +127,7 @@ func (s *paymentservice) Create(ctx context.Context, userID int, input request.P
 		if err := helper.AppendLedgerEntry(
 			tx, user.CompanyID, input.CustomerID, paymentdate,
 			model.CustomerLedgerReferencePayment, newdata.ID,
-			fmt.Sprintf("Payment %s", newdata.PaymentNumber),
+			fmt.Sprintf("ការសងប្រាក់ %s", newdata.PaymentNumber),
 			0, input.Amount,
 		); err != nil {
 			return err
@@ -197,7 +197,7 @@ func (s *paymentservice) Void(ctx context.Context, id int, userID int, input req
 		if err := helper.AppendLedgerEntry(
 			tx, payment.CompanyID, payment.CustomerID, time.Now(),
 			model.CustomerLedgerReferencePayment, payment.ID,
-			fmt.Sprintf("Voided payment %s: %s", payment.PaymentNumber, input.Reason),
+			fmt.Sprintf("លុបការសងប្រាក់ %s: %s", payment.PaymentNumber, input.Reason),
 			payment.Amount, 0,
 		); err != nil {
 			return err
@@ -229,6 +229,9 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 		return s.db.WithContext(ctx).
 			Table("payments p").
 			Joins("LEFT JOIN customers c ON c.id = p.customer_id").
+			Joins("LEFT JOIN companies cp ON cp.id = p.company_id").
+			Joins("LEFT JOIN branches b ON b.id = p.branch_id").
+			Joins("LEFT JOIN users u ON u.id = p.created_by").
 			Where("p.company_id = ?", user.CompanyID)
 	}
 
@@ -266,7 +269,12 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 		p.method AS method,
 		p.reference_number AS reference_number,
 		p.note AS note,
-		p.status AS status
+		p.status AS status,
+		cp.name AS company_Name,
+		b.id AS branch_id,
+		b.name AS branch_Name,
+		b.phone AS branch_phone,
+		u.name AS create_by
 	`)
 
 	if err := dataQuery.Order("p.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
@@ -275,6 +283,7 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 
 	for i := range data {
 		data[i].PaymentDate = helper.FormatDate(data[i].PaymentDate)
+		data[i].CurrencyCode = helper.Currency(data[i].CurrencyCode)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

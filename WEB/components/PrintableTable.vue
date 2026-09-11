@@ -4,7 +4,7 @@
       <el-row :gutter="0" align="middle" class="doc-header">
         <el-col :span="4">
           <div class="header-logo">
-            <el-image :src="url" fit="contain" class="university-logo" />
+            <!-- <el-image :src="url" fit="contain" class="university-logo" /> -->
             <h4 class="label">ក្រុមហ៊ុន {{ company }}</h4>
             <h4 class="label">{{ branch }}</h4>
           </div>
@@ -18,8 +18,9 @@
         </el-col>
 
         <el-col :span="4">
-          <h4 class="title-doc">អតិថិជន</h4>
-           <h3 class="title-doc">{{ customer }}</h3>
+          
+          <h4 class="tell">លេខទូរសព្ទ: {{ phone }}</h4>
+           
         </el-col>
       </el-row>
 
@@ -44,7 +45,9 @@
       </table>
 <div class="p-5">
     <el-row :gutter="20">
-  <el-col :span="12"></el-col>
+  <el-col :span="12">
+     <h4 class="align-left">អតិថិជន {{ customer }}</h4>
+  </el-col>
   <el-col :span="12">
     <h4 class="align-right">សរុប {{ total_amount }}{{ currency }}</h4>
      <h4 class="align-right">កក់មុន {{ paid_amount }}{{ currency }}</h4>
@@ -92,6 +95,10 @@ defineProps({
     type: String,
     default: "",
   },
+  phone: {
+    type: String,
+    default:"",
+  },
   columns: {
     type: Array,
     required: true,
@@ -125,13 +132,23 @@ defineExpose({ print });
   text-align: right !important;
 }
 
+.align-left {
+  margin-top: 10px;
+  text-align: left !important; 
+}
+
 .header-logo {
-  padding-top: 20px;
+  padding-top: 120px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
+}
+
+.tell {
+  padding-top: 100px;
+  text-align: right !important;
 }
 
 .university-logo {

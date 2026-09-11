@@ -68,6 +68,7 @@ const branchform = reactive({
   company_id: null,
   name: "",
   address: "",
+  phone: "",
   status: "ACTIVE",
 });
 
@@ -84,6 +85,7 @@ function openCreateBranch(companyRow) {
   branchform.company_id = companyRow.id;
   branchform.name = "";
   branchform.address = "";
+  branchform.phone = "";
   branchform.status = "ACTIVE";
   branchDialogVisible.value = true;
 }
@@ -95,6 +97,7 @@ function openEditBranch(companyRow, branchRow) {
   branchform.company_id = companyRow.id;
   branchform.name = branchRow.name || "";
   branchform.address = branchRow.address || "";
+  branchform.phone = branchRow.phone || "";
   branchform.status = branchRow.status || "ACTIVE";
   branchDialogVisible.value = true;
 }
@@ -109,6 +112,7 @@ async function handleSaveBranch() {
         company_id: branchform.company_id,
         name: branchform.name,
         address: branchform.address,
+        phone: branchform.phone,
         status: branchform.status,
       };
       await updatebranch(editBranchId.value, payload);
@@ -119,6 +123,7 @@ async function handleSaveBranch() {
         company_id: branchform.company_id,
         name: branchform.name,
         address: branchform.address,
+        phone: branchform.phone
       };
       await addbranch(payload);
       notify.success("បង្កើតសាខាបានជោគជ័យ");
@@ -137,6 +142,7 @@ async function handleSaveBranch() {
 const branchcolumns = [
   { prop: "name", slot: "name", label: "ឈ្មោះ", minwidth: 120 },
   { prop: "address", label: "ទីតាំងសាខា", minwidth: 120 },
+   {prop: "phone", label: "លេខទូរសព្ទសាខា", minwidth: 120 },
   { slot: "status", label: "ស្ថានភាព", width: 120 },
 ];
 
@@ -628,6 +634,12 @@ onMounted(()=>{
           prop="address"
           v-model="branchform.address"
           placeholder="បញ្ចូលទីតាំងសាខា"
+        >
+        </AppInput>
+        <AppInput
+          label="លេខទូរសព្ទសាខា"
+          v-model="branchform.phone"
+          placeholder="បញ្ចូលលេខទូរសព្ទសាខា"
         >
         </AppInput>
         <AppSelect

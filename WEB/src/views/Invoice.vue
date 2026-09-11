@@ -75,6 +75,7 @@ const paid_amount = ref(null)
 const outstanding_amount = ref(null)
 const customer = ref("")
 const currency = ref("")
+const phone = ref("")
 function printInvoiceList(invoice, invoiceitem) {
   printRows.value = invoice.invoice_item || []
   printInvoiceNumber.value = invoice.invoice_number || ""
@@ -84,6 +85,7 @@ function printInvoiceList(invoice, invoiceitem) {
   currency.value = invoice.currency_code || 0
   paid_amount.value = invoice.paid_amount || 0
   customer.value = invoice.customer_name || ""
+  phone.value = invoice.branch_phone || ""
   outstanding_amount.value = invoice.outstanding_amount
   nextTick(() => {
     printableRef.value?.print()
@@ -686,6 +688,7 @@ onMounted(() => {
   :paid_amount="`${paid_amount}`"
   :outstanding_amount="`${outstanding_amount}`"
   :customer="`${customer}`"
+  :phone="`${phone}`"
   :columns="invoiceitemPrintcolumns"
   :rows="printRows"
 />

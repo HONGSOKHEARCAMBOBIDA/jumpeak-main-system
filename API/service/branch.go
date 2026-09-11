@@ -37,6 +37,7 @@ func (s *branchservice) Create(ctx context.Context, input request.BranchRequestC
 			CompanyID: input.CompanyID,
 			Name:      input.Name,
 			Address:   input.Address,
+			Phone:     input.Phone,
 			Status:    model.BranchStatusActive,
 		}
 		if err := tx.Create(&newdata).Error; err != nil {
@@ -65,6 +66,7 @@ func (s *branchservice) Update(ctx context.Context, id int, input request.Branch
 		data.CompanyID = input.CompanyID
 		data.Name = input.Name
 		data.Address = input.Address
+		data.Phone = input.Phone
 		data.Status = input.Status
 		if err := tx.Save(&data).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to update student", nil)

@@ -90,7 +90,7 @@ async function loadPaidInvoices(customerId) {
     paidInvoiceOptions.value = (res.data.data || [])
       .filter((i) => i.paid_amount > 0)
       .map((i) => ({
-        label: `${i.invoice_number} — បានបង់ ${i.paid_amount}`,
+        label: `${i.invoice_number} — បានបង់ ${i.paid_amount}${i.currency_code}`,
         value: i.id,
         raw: i,
       }));
@@ -166,7 +166,7 @@ function openCreate() {
   form.payment_id = null;
   form.amount = 0;
   form.reason = "";
-  form.refunded_at = "";
+  form.refunded_at = new Date().toISOString().split('T')[0];
   allocations.value = [blankAllocation()];
   paymentOptions.value = [];
   paidInvoiceOptions.value = [];
@@ -264,18 +264,24 @@ onMounted(() => {
         :columns="[
           { prop: 'payment_number', label: 'ការទូទាត់ដើម', minWidth: 140 },
           { prop: 'customer_name', label: 'អតិថិជន', minWidth: 150 },
+          { prop: 'company_Name', label: 'ក្រុមហ៑ុន', width: 160 },
+           { slot: 'branch_Name', label: 'សាខា', width: 200 },
           { slot: 'amount', label: 'ចំនួនត្រឡប់', width: 130 },
           { prop: 'reason', label: 'មូលហេតុ', minWidth: 160 },
           { prop: 'refunded_at', label: 'កាលបរិច្ឆេទ', width: 120 },
+          { prop: 'create_by', label: 'បង្កើតដោយ', width: 200 },
         ]"
       >
         <template #amount="{ row }">
-          <el-text tag="b" type="danger">{{ row.amount }}</el-text>
+          <el-text tag="b" type="danger">{{ row.amount }} <el-text size="small" type="primary">{{ row.currency }}</el-text></el-text>
+        </template>
+        <template #branch_Name="{row}">
+          <el-text>{{ row.branch_Name }} | <el-text size="small" type="primary">{{ row.branch_Code }}</el-text></el-text>
         </template>
       </AppTable>
     </el-card>
 
-    <AppDialog v-model="dialogVisible" title="បង្កើតការត្រឡប់ប្រាក់" width="45%" :showDefaultFooter="false">
+    <AppDialog v-model="dialogVisible" title="បង្កើតការត្រឡប់ប្រាក់" width="55%" :showDefaultFooter="false">
       <AppForm
         ref="formRef"
         :model="form"

@@ -124,7 +124,7 @@ func (s *invoiceservice) Create(ctx context.Context, userID int, input request.I
 		if err := helper.AppendLedgerEntry(
 			tx, user.CompanyID, input.CustomerID, invoiceDate,
 			model.CustomerLedgerReferenceInvoice, uint64(newdata.ID),
-			fmt.Sprintf("Invoice %s", newdata.InvoiceNumber),
+			fmt.Sprintf("វិក្កយបត្រ %s", newdata.InvoiceNumber),
 			total, 0,
 		); err != nil {
 			return err
@@ -178,7 +178,7 @@ func (s *invoiceservice) Cancel(ctx context.Context, id int, userID int, input r
 		if err := helper.AppendLedgerEntry(
 			tx, invoice.CompanyID, invoice.CustomerID, now,
 			model.CustomerLedgerReferenceInvoice, uint64(invoice.ID),
-			fmt.Sprintf("Cancelled invoice %s", invoice.InvoiceNumber),
+			fmt.Sprintf("លុបវិក្កយបត្រ %s", invoice.InvoiceNumber),
 			0, outstanding,
 		); err != nil {
 			return err
@@ -253,7 +253,8 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 		i.status AS status,
 		i.cancel_reason AS cancel_reason,
 		cp.name AS company_Name,
-		b.name AS branch_Name
+		b.name AS branch_Name,
+		b.phone AS branch_phone
 	`)
 
 	if err := dataQuery.Order("i.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
