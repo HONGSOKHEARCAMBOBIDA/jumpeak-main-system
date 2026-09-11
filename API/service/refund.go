@@ -143,7 +143,10 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 
 	var data []response.RefundResponse
 	var total int64
-
+	var user model.User
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
+		return nil, nil, err
+	}
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("refunds r").
@@ -179,10 +182,13 @@ func (s *refundservice) Get(ctx context.Context, userID int, pf request.Paginati
 		p.payment_number AS payment_number,
 		cp.name AS company_Name,
 		p.currency_code AS currency,
+		b.id AS branch_id,
 		b.name AS branch_Name,
 		b.code AS branch_Code,
 		u.name AS create_by
 	`)
+
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 
 	if err := dataQuery.Order("r.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch refunds: %w", err)

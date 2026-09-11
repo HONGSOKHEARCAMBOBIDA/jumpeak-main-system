@@ -199,7 +199,7 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 	helper.NormalizePagination(&pf)
 
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
 		return nil, nil, err
 	}
 
@@ -211,8 +211,7 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 			Table("invoices i").
 			Joins("LEFT JOIN customers c ON c.id = i.customer_id").
 			Joins("LEFT JOIN companies cp ON cp.id = i.company_id").
-			Joins("LEFT JOIN branches b ON b.id = i.branch_id").
-			Where("i.company_id = ?", user.CompanyID)
+			Joins("LEFT JOIN branches b ON b.id = i.branch_id")
 	}
 
 	applyFilters := func(tx *gorm.DB) *gorm.DB {
@@ -231,6 +230,7 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 	if err := applyFilters(base()).Count(&total).Error; err != nil {
 		return nil, nil, fmt.Errorf("count invoice: %w", err)
 	}
+
 	if total == 0 {
 		return []response.InvoiceResponse{}, helper.BuildPaginationMeta(pf, total), nil
 	}
@@ -239,7 +239,6 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 	dataQuery := applyFilters(base()).Select(`
 		i.id AS id,
 		i.company_id AS company_id,
-		i.branch_id AS branch_id,
 		i.customer_id AS customer_id,
 		c.name AS customer_name,
 		i.invoice_number AS invoice_number,
@@ -253,9 +252,12 @@ func (s *invoiceservice) Get(ctx context.Context, userID int, pf request.Paginat
 		i.status AS status,
 		i.cancel_reason AS cancel_reason,
 		cp.name AS company_Name,
+		b.id AS branch_id,
 		b.name AS branch_Name,
 		b.phone AS branch_phone
 	`)
+
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 
 	if err := dataQuery.Order("i.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch invoices: %w", err)

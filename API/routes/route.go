@@ -21,6 +21,7 @@ func SetupRoutes(r *gin.Engine) {
 	deptadjustmentcontroller := controller.NewDebtAdjustmentController()
 	refundcontroller := controller.NewRefundController()
 	customerledgercontroller := controller.NewCustomerledgerController()
+	reportcontroller := controller.NewReportController()
 	public := r.Group("/")
 	public.Use(middleware.APIKeyAuth())
 	{
@@ -84,5 +85,8 @@ func SetupRoutes(r *gin.Engine) {
 
 		// CustomerLedger
 		auth.GET(route.ViewCustomerledger, middleware.PermissionMiddleware(permission.ViewCustomerledger), customerledgercontroller.Get)
+
+		// Reportcontroller
+		auth.GET(route.ViewCustomerOutstadingReport, middleware.PermissionMiddleware(permission.ViewReport), reportcontroller.GetCustomerOutstandingReport)
 	}
 }

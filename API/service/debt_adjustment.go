@@ -119,7 +119,7 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 	helper.NormalizePagination(&pf)
 
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
 		return nil, nil, err
 	}
 
@@ -172,6 +172,8 @@ func (s *debtadjustmentservice) Get(ctx context.Context, userID int, pf request.
 		b.code AS branch_Code,
 		u.name AS approved_by
 	`)
+
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 
 	if err := dataQuery.Order("d.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch debt adjustments: %w", err)

@@ -224,7 +224,7 @@ func (s *authservice) RefreshToken(refreshToken string, c *gin.Context) (*respon
 		return nil, errors.New("Bad request")
 	}
 
-	accessExpiry := time.Now().Add(time.Duration(accesstoken) * time.Minute)
+	accessExpiry := time.Now().Add(time.Duration(accesstoken) * time.Hour)
 	refreshExpiry := time.Now().Add(time.Duration(refreshtoken) * 24 * time.Hour)
 	newRefreshBytes := make([]byte, 32)
 	if _, err := rand.Read(newRefreshBytes); err != nil {
@@ -282,8 +282,10 @@ func (s *authservice) GetUserData(ctx context.Context, id int) (response.UserDat
 		Select(`
 			u.id AS id,
 			u.name AS name,
-			u.role_id AS role_id
+			u.role_id AS role_id,
+			b.name AS branch_name
 		`).
+		Joins("LEFT JOIN branches b ON b.id = u.branch_id").
 		Where("u.id = ?", id).First(&userdata).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return userdata, fmt.Errorf("user with id %d not found", id)

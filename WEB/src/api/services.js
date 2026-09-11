@@ -87,3 +87,6 @@ export const addrefund = (data) => api.post('/add.Refund',data)
 // Customerledger
 
 export const getcustomerledger = (params) => api.get(`/view.Customerledger`,{params})
+
+// Report
+export const getcustomeroutstandingreport = (params) => api.get(`/view.customer.outstanding.report`,{params})

@@ -218,7 +218,7 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 	helper.NormalizePagination(&pf)
 
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
 		return nil, nil, err
 	}
 
@@ -276,6 +276,8 @@ func (s *paymentservice) Get(ctx context.Context, userID int, pf request.Paginat
 		b.phone AS branch_phone,
 		u.name AS create_by
 	`)
+
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 
 	if err := dataQuery.Order("p.id DESC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch payments: %w", err)

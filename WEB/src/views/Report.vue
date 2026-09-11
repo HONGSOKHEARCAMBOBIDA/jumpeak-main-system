@@ -3,6 +3,59 @@
     <div class="dash-grid">
       <el-card class="dash-card">
         <div class="action-grid">
+          <div class="action-btn" @click="$router.push('/ViewCustomerOutstadingReport')">
+            <el-icon size="26" color="#409eff">
+              <UserFilled />
+            </el-icon>
+            <span>ទឹកប្រាក់ដែលអតិថិជនទាំងអស់ជំពាក់</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/product')">
+            <el-icon size="26" color="#67c23a">
+              <Clock />
+            </el-icon>
+            <span>មុខទំនិញ</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/invoice')">
+            <el-icon size="26" color="#8E44AD">
+              <List />
+            </el-icon>
+            <span>វិក័យបត្រ</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/Payment')">
+            <el-icon size="26" color="#67C23A">
+              <Promotion />
+            </el-icon>
+            <span>សង់លុយ</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/Refund')">
+            <el-icon size="26" color="#67C23A">
+              <Refresh />
+            </el-icon>
+            <span>សង់ប្រាក់អតិថិជនវិញ</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/Debtadjustment')">
+            <el-icon size="26" color="#67C23A">
+              <Edit />
+            </el-icon>
+            <span>កែបំណុល</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/company')">
+            <el-icon size="26" color="#e6a23c">
+              <School />
+            </el-icon>
+            <span>ក្រុមហ៑ុន</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/Customerledger')">
+            <el-icon size="26" color="#f56c6c">
+              <Notebook />
+            </el-icon>
+            <span>បញ្ជីបំណុលអតិថិជន</span>
+          </div>
+        </div>
+      </el-card>
+
+      <el-card class="dash-card">
+        <div class="action-grid">
           <div class="action-btn" @click="$router.push('/customer')">
             <el-icon size="26" color="#409eff">
               <UserFilled />
@@ -50,12 +103,6 @@
               <Notebook />
             </el-icon>
             <span>បញ្ជីបំណុលអតិថិជន</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/Report')">
-            <el-icon size="26" color="#f56c6c">
-              <TrendCharts />
-            </el-icon>
-            <span>របាយការណ៍</span>
           </div>
         </div>
       </el-card>
@@ -145,7 +192,7 @@ import { ref, onMounted, reactive } from "vue";
   flex-direction: column;
   align-items: center;
   gap: 6px;
-  padding: 16px 8px;
+  padding: 8px 8px;
   border-radius: 10px;
   border: 1px solid #ebeef5;
   cursor: pointer;

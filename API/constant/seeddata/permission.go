@@ -119,4 +119,8 @@ var Permissions = []model.Permission{
 		Name:        "view.Customerledger",
 		DisplayName: "view.Customerledger",
 	},
+	{
+		Name:        "view.Report",
+		DisplayName: "view.Report",
+	},
 }

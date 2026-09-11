@@ -100,6 +100,16 @@ const routes = [
         component: () => import("../views/Customerledger.vue"),
       },
       {
+        path: "Report",
+        name: "Report",
+        component: () => import("../views/Report.vue"),
+      },
+      {
+        path: "ViewCustomerOutstadingReport",
+        name: "ViewCustomerOutstadingReport",
+        component: () => import("../views/ViewCustomerOutstadingReport.vue"),
+      },
+      {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: () => import("../views/NotFound.vue"),

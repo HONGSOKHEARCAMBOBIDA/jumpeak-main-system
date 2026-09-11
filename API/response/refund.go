@@ -3,6 +3,7 @@ package response
 type RefundResponse struct {
 	ID            uint64  `json:"id"`
 	CompanyName   string  `json:"company_Name"`
+	BranchID      int     `json:"branch_id"`
 	BranchName    string  `json:"branch_Name"`
 	BranchCode    string  `json:"branch_Code"`
 	CustomerName  string  `json:"customer_name"`

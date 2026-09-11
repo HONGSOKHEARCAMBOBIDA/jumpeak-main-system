@@ -65,4 +65,7 @@ const (
 
 	// Customerledger
 	ViewCustomerledger = "view.Customerledger"
+
+	// Report
+	ViewCustomerOutstadingReport = "view.customer.outstanding.report"
 )

@@ -36,7 +36,7 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 	helper.NormalizePagination(&pf)
 
 	var user model.User
-	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
+	if err := s.db.WithContext(ctx).Preload("Role").First(&user, userID).Error; err != nil {
 		return nil, nil, err
 	}
 
@@ -92,6 +92,7 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 		b.code AS branch_Code
 	`)
 
+	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 	// Chronological order (oldest first) so the running balance reads top-to-bottom
 	// like a statement of account; reverse in the UI if a "latest first" view is wanted.
 	if err := dataQuery.Order("l.entry_date ASC").Order("l.id ASC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {

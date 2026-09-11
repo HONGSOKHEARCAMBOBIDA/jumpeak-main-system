@@ -63,7 +63,7 @@
               style="font-size: 14px"
             >
               {{ userName }}
-            </span>
+            </span> | <el-text type="primary">{{ branch_name }}</el-text>
           </div>
 
           <template #dropdown>
@@ -120,6 +120,7 @@ const auth = useAuthStore()
 const userdataStore = useUserDataStore()
 
 const userName = computed(() => userdataStore.name || 'User')
+const branch_name = computed(() => userdataStore.branch_name || '-')
 const collapsed = ref(false)
 
 const nav = computed(() => {
@@ -166,7 +167,7 @@ onMounted(() => {
 /* Sidebar */
 .sidebar {
   width: 260px;
-  background: #1a1a2e;
+  background: #000000;
   display: flex;
   flex-direction: column;
   transition: width 0.3s;

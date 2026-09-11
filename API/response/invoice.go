@@ -14,7 +14,7 @@ type InvoiceResponse struct {
 	ID                  uint64                `json:"id"`
 	CompanyID           uint64                `json:"company_id"`
 	CompanyName         string                `json:"company_Name"`
-	BranchID            uint64                `json:"branch_id"`
+	BranchID            uint64                `json:"branch_id" gorm:"column:branch_id"`
 	BranchName          string                `json:"branch_Name"`
 	BranchPhone         string                `json:"branch_phone"`
 	CustomerID          uint64                `json:"customer_id"`
