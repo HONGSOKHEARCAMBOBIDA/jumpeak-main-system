@@ -127,6 +127,7 @@ async function searchProducts(query) {
   try {
     const res = await getproduct({ page: 1, page_size: 20, name: query || "" });
     productOptions.value = (res.data.data || []).map((p) => ({
+      default_price: p.default_price,
       label: p.name,
       value: p.id,
       raw: p,
@@ -183,7 +184,9 @@ function removeItemRow(key) {
 function onProductPicked(row) {
   const opt = productOptions.value.find((o) => o.value === row.product_id);
   row.description = "";
+  row.unit_price = 0;
   if (opt && !row.description) row.description = opt.label;
+  if (opt && !row.unit_price) row.unit_price = opt.default_price;
 }
 
 function itemSubtotal(row) {
@@ -501,6 +504,7 @@ onMounted(() => {
     <AppDialog
       v-model="dialogVisible"
       title="បង្កើតវិក័យបត្រ"
+      
       width="65%"
       :showDefaultFooter="false"
     >
@@ -524,6 +528,7 @@ onMounted(() => {
               size="large"
               placeholder="ជ្រើសរើសអតិថិជន"
               filterable
+              clearable
               remote
               :remote-method="searchCustomers"
               :loading="customerSearching"

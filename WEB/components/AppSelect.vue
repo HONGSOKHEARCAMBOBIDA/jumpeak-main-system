@@ -9,6 +9,10 @@ defineProps({
   clearable: { type: Boolean, default: true },
   filterable: { type: Boolean, default: false },
   disabled: { type: Boolean, default: false },
+
+  remote: { type: Boolean, default: false },
+  remoteMethod: { type: Function, default: null },
+  loading: { type: Boolean, default: false },
 })
 defineEmits(['update:modelValue', 'change'])
 
@@ -26,6 +30,9 @@ function normalize(opt) {
       :clearable="clearable"
       :filterable="filterable"
       :disabled="disabled"
+      :remote="remote"
+      :remote-method="remoteMethod"
+      :loading="loading"
       class="w-full"
       @update:model-value="$emit('update:modelValue', $event)"
       @change="$emit('change', $event)"

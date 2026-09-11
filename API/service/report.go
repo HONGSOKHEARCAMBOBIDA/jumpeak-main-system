@@ -52,14 +52,10 @@ func (s *reportservice) GetCustomerOutstandingReport(ctx context.Context, userID
 		return tx
 	}
 
-	countQuery := helper.ApplyAccessFilter(applyFilters(base()), s.db, user.Role, user)
-
 	var total int64
-	if err := countQuery.
-		Select("cp.id").
-		Group("cp.id").
-		Count(&total).Error; err != nil {
-		return nil, nil, fmt.Errorf("count customer: %w", err)
+
+	if err := applyFilters(base()).Count(&total).Error; err != nil {
+		return nil, nil, fmt.Errorf("count companies: %w", err)
 	}
 
 	if total == 0 {
@@ -108,8 +104,7 @@ func (s *reportservice) GetCustomerOutstandingReport(ctx context.Context, userID
 		`).
 		Group("cp.id, b.id, b.name")
 
-	branchQuery = applyFilters(branchQuery)
-
+	branchQuery = helper.ApplyAccessFilter(branchQuery, s.db, user.Role, user)
 	if err := branchQuery.Scan(&branchOutStandingReport).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch branches: %w", err)
 	}

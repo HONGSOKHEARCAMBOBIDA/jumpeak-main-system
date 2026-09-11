@@ -15,9 +15,9 @@
         :default-active="$route.path"
         router
         :collapse="collapsed"
-        background-color="#1a1a2e"
-        text-color="#a0a8c0"
-        active-text-color="#fff"
+        background-color="#fcfcfc"
+        text-color="#050000"
+        active-text-color="#050000"
       >
         <el-menu-item
           v-for="n in nav"
@@ -167,7 +167,7 @@ onMounted(() => {
 /* Sidebar */
 .sidebar {
   width: 260px;
-  background: #000000;
+  background: #ffffff;
   display: flex;
   flex-direction: column;
   transition: width 0.3s;
@@ -188,7 +188,7 @@ onMounted(() => {
 }
 
 .brand {
-  color: #fff;
+  color: #0e0000;
   font-size: 15px;
   font-weight: 700;
   white-space: nowrap;
@@ -204,8 +204,8 @@ onMounted(() => {
 }
 
 :deep(.el-menu-item.is-active) {
-  background: rgba(64, 158, 255, 0.2) !important;
-  color: #fff !important;
+  background: rgba(25, 136, 247, 0.2) !important;
+  color: #140101 !important;
 }
 
 /* Main */

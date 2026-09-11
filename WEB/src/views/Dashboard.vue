@@ -11,37 +11,37 @@
           </div>
           <div class="action-btn" @click="$router.push('/product')">
             <el-icon size="26" color="#67c23a">
-              <Clock />
+              <Goods />
             </el-icon>
             <span>មុខទំនិញ</span>
           </div>
           <div class="action-btn" @click="$router.push('/invoice')">
             <el-icon size="26" color="#8E44AD">
-              <List />
+              <Tickets />
             </el-icon>
             <span>វិក័យបត្រ</span>
           </div>
           <div class="action-btn" @click="$router.push('/Payment')">
             <el-icon size="26" color="#67C23A">
-              <Promotion />
+              <Money />
             </el-icon>
             <span>សង់លុយ</span>
           </div>
           <div class="action-btn" @click="$router.push('/Refund')">
             <el-icon size="26" color="#67C23A">
-              <Refresh />
+              <RefreshLeft />
             </el-icon>
             <span>សង់ប្រាក់អតិថិជនវិញ</span>
           </div>
           <div class="action-btn" @click="$router.push('/Debtadjustment')">
             <el-icon size="26" color="#67C23A">
-              <Edit />
+              <EditPen />
             </el-icon>
             <span>កែបំណុល</span>
           </div>
           <div class="action-btn" @click="$router.push('/company')">
             <el-icon size="26" color="#e6a23c">
-              <School />
+              <OfficeBuilding />
             </el-icon>
             <span>ក្រុមហ៑ុន</span>
           </div>
@@ -53,7 +53,7 @@
           </div>
           <div class="action-btn" @click="$router.push('/Report')">
             <el-icon size="26" color="#f56c6c">
-              <TrendCharts />
+              <DataAnalysis />
             </el-icon>
             <span>របាយការណ៍</span>
           </div>

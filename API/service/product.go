@@ -44,9 +44,10 @@ func (s *productservice) Create(ctx context.Context, userID int, input request.P
 			newdata := make([]model.Product, 0, len(input.ProductRequest))
 			for _, n := range input.ProductRequest {
 				newdata = append(newdata, model.Product{
-					CompanyID: user.CompanyID,
-					Name:      n.Name,
-					Status:    model.ProductStatusActive,
+					CompanyID:    user.CompanyID,
+					Name:         n.Name,
+					DefaultPrice: n.DefaultPrice,
+					Status:       model.ProductStatusActive,
 				})
 			}
 			if err := tx.Create(&newdata).Error; err != nil {
@@ -70,6 +71,7 @@ func (s *productservice) Update(ctx context.Context, id int, input request.Produ
 			return apperror.New(apperror.CodeInternal, "failed to fetch classcurriculumn", nil)
 		}
 		data.Name = input.Name
+		data.DefaultPrice = input.DefaultPrice
 		data.Status = input.Status
 		if err := tx.Save(&data).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to update product", nil)
@@ -119,12 +121,17 @@ func (s *productservice) Get(ctx context.Context, userID int, pf request.Paginat
 		c.base_currency AS company_currency,
 		p.id AS id,
 		p.name AS name,
+		p.default_price AS default_price,
 		p.status AS status
 	`)
 
 	dataQuery = helper.CompanyFilter(dataQuery, s.db, user.Role, user)
 	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch product: %w", err)
+	}
+
+	for i := range data {
+		data[i].CompanyCurrency = helper.Currency(data[i].CompanyCurrency)
 	}
 
 	return data, helper.BuildPaginationMeta(pf, total), nil

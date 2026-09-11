@@ -12,5 +12,6 @@ type ProductResponse struct {
 	CompanyCurrency string              `json:"company_currency"`
 	BranchName      string              `json:"branch_name"`
 	Name            string              `gorm:"type:varchar(150);not null" json:"name"`
+	DefaultPrice    float64             `json:"default_price" gorm:"column:default_price"`
 	Status          model.ProductStatus `gorm:"type:enum('ACTIVE','INACTIVE');not null;default:ACTIVE" json:"status"`
 }

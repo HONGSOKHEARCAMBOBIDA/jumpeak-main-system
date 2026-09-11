@@ -7,10 +7,12 @@ type ProductRequestCreate struct {
 }
 
 type ProductRequest struct {
-	Name string `gorm:"type:varchar(150);not null" json:"name"`
+	Name         string  `gorm:"type:varchar(150);not null" json:"name"`
+	DefaultPrice float64 `json:"default_price" gorm:"column:default_price"`
 }
 
 type ProductRequestUpdate struct {
-	Name   string              `gorm:"type:varchar(150);not null" json:"name"`
-	Status model.ProductStatus `gorm:"type:enum('ACTIVE','INACTIVE');not null;default:ACTIVE" json:"status"`
+	Name         string              `gorm:"type:varchar(150);not null" json:"name"`
+	DefaultPrice float64             `json:"default_price" gorm:"column:default_price"`
+	Status       model.ProductStatus `gorm:"type:enum('ACTIVE','INACTIVE');not null;default:ACTIVE" json:"status"`
 }

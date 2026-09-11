@@ -61,7 +61,7 @@ const StatusOption = [
 // --- Create form: backend accepts an array of products (ProductRequestCreate.product) ---
 // so the create dialog lets you queue up several names before saving them all at once.
 function blankRow() {
-  return { key: Date.now() + Math.random(), name: "" };
+  return { key: Date.now() + Math.random(), name: "", default_price: "" };
 }
 const createRows = ref([blankRow()]);
 
@@ -76,6 +76,7 @@ function removeRow(key) {
 // --- Edit form: single product, name + status ---
 const form = reactive({
   name: "",
+  default_price: 0,
   status: "ACTIVE",
 });
 
@@ -121,6 +122,7 @@ function openEdit(row) {
   editId.value = row.id;
   Object.assign(form, {
     name: row.name || "",
+    default_price: row.default_price || 0,
     status: row.status || "ACTIVE",
   });
   dialogVisible.value = true;
@@ -131,26 +133,34 @@ async function handleSave() {
   useloading.show({ text: "កំពុងដំណេីរការ..." });
   try {
     if (isEdit.value) {
-      // matches ProductRequestUpdate
       const payload = {
         name: form.name,
+        default_price: form.default_price,
         status: form.status,
       };
       await updateproduct(editId.value, payload);
       notify.success("កែប្រែផលិតផលបានជោគជ័យ");
     } else {
-      // matches ProductRequestCreate: { product: [{ name }, ...] }
-      const names = createRows.value
-        .map((r) => r.name.trim())
-        .filter((n) => n !== "");
-      if (names.length === 0) {
+      // matches ProductRequestCreate: { product: [{ name, default_price }, ...] }
+      const rows = createRows.value
+        .map((r) => ({
+          name: r.name.trim(),
+          default_price:
+            r.default_price === "" || r.default_price === null || isNaN(Number(r.default_price))
+              ? 0
+              : Number(r.default_price),
+        }))
+        .filter((r) => r.name !== "");
+
+      if (rows.length === 0) {
         notify.error("សូមបញ្ចូលឈ្មោះផលិតផលយ៉ាងតិចមួយ");
         saving.value = false;
         useloading.hide();
         return;
       }
+
       const payload = {
-        product: names.map((name) => ({ name })),
+        product: rows,
       };
       await addproduct(payload);
       notify.success("បង្កើតផលិតផលបានជោគជ័យ");
@@ -237,10 +247,15 @@ onMounted(() => {
         @page-change="fetchProducts"
         :columns="[
           { prop: 'name', label: 'ឈ្មោះឥវ៉ាន់', minWidth: 180 },
+          { slot: 'default_price', label: 'តម្លៃលក់រាយ', minWidth: 180 },
           { prop: 'company_name', label: 'ក្រុមហ៊ុន', minWidth: 150 },
           { label: 'ស្ថានភាព', slot: 'status', width: 120 },
         ]"
       >
+
+      <template #default_price="{row}">
+        <el-text>{{ row.default_price }} <el-text size="small">{{ row.company_currency }}</el-text></el-text>
+      </template>
         <template #status="{ row }">
           <el-text :type="row.status === 'ACTIVE' ? 'success' : 'info'" size="small">
             {{ row.status }}
@@ -284,6 +299,12 @@ onMounted(() => {
           prop="name"
           placeholder="បញ្ចូលឈ្មោះឥវ៉ាន់"
         />
+         <AppInput
+          v-model.number="form.default_price"
+          type="number"
+          label="តម្លៃលក់រាយ"
+          placeholder="បញ្ចូលតម្លៃលក់រាយ"
+        />
 
         <AppSelect
           v-model="form.status"
@@ -299,11 +320,22 @@ onMounted(() => {
         <div v-for="row in createRows" :key="row.key">
           <el-row :gutter="20">
             <el-col :span="20">
+              <el-row :gutter="20">
+                <el-col :span="12">
 <AppInput
             v-model="row.name"
             
             placeholder="បញ្ចូលឈ្មោះឥវ៉ាន់"
           />
+                </el-col>
+                <el-col :span="12">
+<AppInput
+            v-model="row.default_price"
+            
+            placeholder="បញ្ចូលតម្លៃលក់រាយ"
+          />
+                </el-col>
+              </el-row>
 
             </el-col>
             <el-col :span="4">

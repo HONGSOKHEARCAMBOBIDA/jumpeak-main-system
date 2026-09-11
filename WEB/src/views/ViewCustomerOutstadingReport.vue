@@ -164,7 +164,7 @@ onMounted(() => {
             <el-text>លម្អិតតាមសាខា</el-text>
           </el-divider>
           <AppTable
-            expandable
+            show-index
             :data="row.branch_outstanding"
             :columns="branchColumns"
             :show-pagination="false"
