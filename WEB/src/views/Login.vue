@@ -4,8 +4,7 @@
       <AppTabs
         v-model="activeTab"
         :tabs="[
-          { name: 'phone', label: 'ចូលតាមរយៈលេខទូរសព្ទ' },
-          { name: 'qr', label: 'ចូលតាមរយៈQR' },
+          { name: 'phone', label: 'ចូលប្រព័ន្ធ' },
         ]"
         tab-position="top"
         stretch="true"
@@ -90,6 +89,7 @@ async function handleLogin() {
     notify.success("ចូលប្រព័ន្ធបានជោគជ័យ")
   } catch (e) {
     notify.error(e.response?.data?.message || "Login failed");
+    console.log(e.response?.data?.message)
   } finally {
     loading.value = false;
   }
