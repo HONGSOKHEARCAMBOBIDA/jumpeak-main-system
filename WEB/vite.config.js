@@ -7,9 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-      //target: 'https://api-hr.familytech.dev',
-        target: 'http://localhost:8081',
-      //  target: 'http://192.241.132.206:8080',
+        target: 'https://api-jompeak-dev.hearpaytrack.uk',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
