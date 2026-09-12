@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       '/api': {
       //target: 'https://api-hr.familytech.dev',
-        target: 'https://api-jompeak-dev.hearpaytrack.uk',
+        target: 'http://localhost:8081',
       //  target: 'http://192.241.132.206:8080',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
