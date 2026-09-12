@@ -88,5 +88,7 @@ func SetupRoutes(r *gin.Engine) {
 
 		// Reportcontroller
 		auth.GET(route.ViewCustomerOutstadingReport, middleware.PermissionMiddleware(permission.ViewReport), reportcontroller.GetCustomerOutstandingReport)
+		auth.GET(route.ViewOverCreditLimitReport, middleware.PermissionMiddleware(permission.ViewReport), reportcontroller.GetOverCreditLimitReport)
+		auth.GET(route.ViewOverDueDateReport, middleware.PermissionMiddleware(permission.ViewReport), reportcontroller.GetOverDueDateReport)
 	}
 }

@@ -274,7 +274,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.customer_id"
           :options="customerOptions"
-          label="អតិថិជន"
           placeholder="អតិថិជន"
           size="large"
           filterable
@@ -289,7 +288,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.status"
           :options="StatusOption"
-          label="ស្ថានភាព"
           size="large"
           placeholder="ស្ថានភាព"
           clearable
@@ -300,7 +298,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.method"
           :options="MethodOption"
-          label="មធ្យោបាយបង់ប្រាក់"
           size="large"
           placeholder="មធ្យោបាយបង់ប្រាក់"
           clearable

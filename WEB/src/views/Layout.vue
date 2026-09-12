@@ -2,7 +2,7 @@
   <div class="layout">
     <aside class="sidebar" :class="{ collapsed }">
       <div class="sidebar-header">
-        <el-icon size="26" color="#fff">
+        <el-icon size="26" color="#050000">
           <UserFilled />
         </el-icon>
 

@@ -194,7 +194,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.customer_id"
           :options="customerOptions"
-          label="អតិថិជន"
           size="large"
           placeholder="អតិថិជន"
           filterable
@@ -209,7 +208,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.type"
           :options="TypeOption"
-          label="ប្រភេទ"
            size="large"
           placeholder="ប្រភេទ"
           clearable

@@ -9,6 +9,8 @@ import AppTable from "../../components/AppTable.vue";
 import AppSelect from "../../components/AppSelect.vue";
 import AppFilterBar from "../../components/AppFilterBar.vue";
 import { useNotification } from "../../composables/useNotification.js";
+import AppButton from "../../components/AppButton.vue";
+import AppDialog from "../../components/AppDialog.vue";
 
 const notify = useNotification();
 
@@ -18,6 +20,14 @@ const loading = ref(false);
 const page = ref(1);
 const pageSize = ref(10);
 const total = ref(0);
+
+const showDetail = ref(false);
+const selected = ref(null);
+
+function openDetail(row) {
+  selected.value = row;
+  showDetail.value = true;
+}
 
 const filters = reactive({
   company_id: null,
@@ -69,7 +79,6 @@ async function fetchReport() {
     const res = await getcustomeroutstandingreport(params);
     report.value = res.data.data || [];
     total.value = res.data.pagination?.totalCount || 0;
-    console.log(report.value)
   } catch (e) {
     notify.error(e?.response?.data?.error || "");
   } finally {
@@ -115,7 +124,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.company_id"
           :options="companyOptions"
-          label="ក្រុមហ៊ុន"
           placeholder="ក្រុមហ៊ុន"
           size="large"
           filterable
@@ -126,7 +134,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.branch_id"
           :options="branchOptions"
-          label="សាខា"
           placeholder="សាខា"
           size="large"
           filterable
@@ -159,6 +166,19 @@ onMounted(() => {
           </el-text>
         </template>
 
+        <template #actions="{row}">
+        <el-tooltip content="មើលលំអិត" placement="top">
+            <AppButton
+              @click="openDetail(row)"
+              size="small"
+              icon="View"
+              type="success"
+              circle
+             
+            />
+          </el-tooltip>
+        </template>
+
         <template #expand="{ row }">
           <el-divider content-position="left">
             <el-text>លម្អិតតាមសាខា</el-text>
@@ -183,6 +203,30 @@ onMounted(() => {
       </AppTable>
     </el-card>
   </div>
+
+      <AppDialog
+      v-model="showDetail"
+      title="លំអិតតាមសាខា"
+      width="40%"
+      :showDefaultFooter="false"
+    >
+          <AppTable
+            show-index
+            :data="selected?.branch_outstanding || []"
+            :columns="branchColumns"
+            :show-pagination="false"
+          >
+            <template #branch_total="{ row: b }">
+              <el-text
+                tag="b"
+                :type="b.total_amount > 0 ? 'danger' : 'info'"
+              >
+                {{ b.total_amount }}
+                <el-text size="small" type="danger">{{ b.currency }}</el-text>
+              </el-text>
+            </template>
+          </AppTable>
+    </AppDialog>
 </template>
 
 <style scoped>

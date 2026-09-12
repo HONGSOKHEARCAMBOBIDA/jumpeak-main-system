@@ -28,7 +28,7 @@
             <span>សង់លុយ</span>
           </div>
           <div class="action-btn" @click="$router.push('/Refund')">
-            <el-icon size="26" color="#67C23A">
+            <el-icon size="26" color="#f56c6c">
               <RefreshLeft />
             </el-icon>
             <span>សង់ប្រាក់អតិថិជនវិញ</span>
@@ -51,11 +51,29 @@
             </el-icon>
             <span>បញ្ជីបំណុលអតិថិជន</span>
           </div>
-          <div class="action-btn" @click="$router.push('/Report')">
-            <el-icon size="26" color="#f56c6c">
-              <DataAnalysis />
+          <div
+            class="action-btn"
+            @click="$router.push('/ViewCustomerOutstadingReport')"
+          >
+            <el-icon size="26" color="#409eff">
+              <UserFilled />
             </el-icon>
-            <span>របាយការណ៍</span>
+            <span>ទឹកប្រាក់ដែលអតិថិជនទាំងអស់ជំពាក់</span>
+          </div>
+          <div
+            class="action-btn"
+            @click="$router.push('/OverCreditLimitReport')"
+          >
+            <el-icon size="26" color="#67c23a">
+              <Clock />
+            </el-icon>
+            <span>អតិថិជនជំពាក់លើសកម្រិត</span>
+          </div>
+          <div class="action-btn" @click="$router.push('/OverDueDateReport')">
+            <el-icon size="26" color="#8E44AD">
+              <List />
+            </el-icon>
+            <span>អតិថិជនជំពាក់ហួសថ្ងៃកំណត់</span>
           </div>
         </div>
       </el-card>

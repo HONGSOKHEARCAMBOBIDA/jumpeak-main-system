@@ -68,4 +68,6 @@ const (
 
 	// Report
 	ViewCustomerOutstadingReport = "view.customer.outstanding.report"
+	ViewOverCreditLimitReport    = "view.over.credit.limit.report"
+	ViewOverDueDateReport        = "view.over.due.date.report"
 )

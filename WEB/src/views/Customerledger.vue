@@ -101,7 +101,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.customer_id"
           :options="customerOptions"
-          label="អតិថិជន"
           placeholder="ជ្រើសរើសអតិថិជន"
           size="large"
           filterable
@@ -116,7 +115,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.reference_type"
           :options="ReferenceTypeOption"
-          label="ប្រភេទ"
           size="large"
           placeholder="ប្រភេទប្រតិបត្តិការ"
           clearable

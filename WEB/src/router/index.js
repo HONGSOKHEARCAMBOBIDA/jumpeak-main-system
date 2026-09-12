@@ -110,6 +110,16 @@ const routes = [
         component: () => import("../views/ViewCustomerOutstadingReport.vue"),
       },
       {
+        path: "OverCreditLimitReport",
+        name: "OverCreditLimitReport",
+        component: () => import("../views/OverCreditLimitReport.vue"),
+      },
+      {
+        path: "OverDueDateReport",
+        name: "OverDueDateReport",
+        component: () => import("../views/OverDueDateReport.vue"),
+      },
+      {
         path: "/:pathMatch(.*)*",
         name: "NotFound",
         component: () => import("../views/NotFound.vue"),

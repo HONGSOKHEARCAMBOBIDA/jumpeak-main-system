@@ -90,3 +90,5 @@ export const getcustomerledger = (params) => api.get(`/view.Customerledger`,{par
 
 // Report
 export const getcustomeroutstandingreport = (params) => api.get(`/view.customer.outstanding.report`,{params})
+export const getovercreditlitmireport = (params) => api.get(`/view.over.credit.limit.report`,{params})
+export const getoverdatereport = (params) => api.get(`/view.over.due.date.report`,{params})

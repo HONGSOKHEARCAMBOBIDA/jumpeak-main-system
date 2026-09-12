@@ -154,6 +154,10 @@ func (s *customerservice) Get(ctx context.Context, userID int, pf request.Pagina
 		return nil, nil, fmt.Errorf("fetch companies: %w", err)
 	}
 
+	for i := range data {
+		data[i].CompanyCurrency = helper.Currency(data[i].CompanyCurrency)
+	}
+
 	return data, helper.BuildPaginationMeta(pf, total), nil
 
 }

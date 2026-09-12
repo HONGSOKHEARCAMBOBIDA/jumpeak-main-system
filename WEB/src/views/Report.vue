@@ -9,17 +9,17 @@
             </el-icon>
             <span>ទឹកប្រាក់ដែលអតិថិជនទាំងអស់ជំពាក់</span>
           </div>
-          <div class="action-btn" @click="$router.push('/product')">
+          <div class="action-btn" @click="$router.push('/OverCreditLimitReport')">
             <el-icon size="26" color="#67c23a">
               <Clock />
             </el-icon>
-            <span>មុខទំនិញ</span>
+            <span>អតិថិជនជំពាក់លើសកម្រិត</span>
           </div>
-          <div class="action-btn" @click="$router.push('/invoice')">
+          <div class="action-btn" @click="$router.push('/OverDueDateReport')">
             <el-icon size="26" color="#8E44AD">
               <List />
             </el-icon>
-            <span>វិក័យបត្រ</span>
+            <span>អតិថិជនជំពាក់ហួសថ្ងៃកំណត់</span>
           </div>
           <div class="action-btn" @click="$router.push('/Payment')">
             <el-icon size="26" color="#67C23A">
@@ -54,58 +54,7 @@
         </div>
       </el-card>
 
-      <el-card class="dash-card">
-        <div class="action-grid">
-          <div class="action-btn" @click="$router.push('/customer')">
-            <el-icon size="26" color="#409eff">
-              <UserFilled />
-            </el-icon>
-            <span>អតិថិជន</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/product')">
-            <el-icon size="26" color="#67c23a">
-              <Clock />
-            </el-icon>
-            <span>មុខទំនិញ</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/invoice')">
-            <el-icon size="26" color="#8E44AD">
-              <List />
-            </el-icon>
-            <span>វិក័យបត្រ</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/Payment')">
-            <el-icon size="26" color="#67C23A">
-              <Promotion />
-            </el-icon>
-            <span>សង់លុយ</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/Refund')">
-            <el-icon size="26" color="#67C23A">
-              <Refresh />
-            </el-icon>
-            <span>សង់ប្រាក់អតិថិជនវិញ</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/Debtadjustment')">
-            <el-icon size="26" color="#67C23A">
-              <Edit />
-            </el-icon>
-            <span>កែបំណុល</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/company')">
-            <el-icon size="26" color="#e6a23c">
-              <School />
-            </el-icon>
-            <span>ក្រុមហ៑ុន</span>
-          </div>
-          <div class="action-btn" @click="$router.push('/Customerledger')">
-            <el-icon size="26" color="#f56c6c">
-              <Notebook />
-            </el-icon>
-            <span>បញ្ជីបំណុលអតិថិជន</span>
-          </div>
-        </div>
-      </el-card>
+
     </div>
   </div>
 </template>

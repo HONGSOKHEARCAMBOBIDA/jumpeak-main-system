@@ -9,7 +9,7 @@ import {
   updatebranch,
   createUser,
   getrole,
-  updateUser
+  updateUser,
 } from "../api/services.js";
 import { useAuthStore } from "../stores/auth";
 import AppTable from "../../components/AppTable.vue";
@@ -34,6 +34,23 @@ const isEdit = ref(false);
 const editId = ref(null);
 const formRef = ref();
 const auth = useAuthStore();
+
+const showDetail = ref(false);
+const selectedInvoice = ref(null);
+
+function openDetail(row) {
+  selectedInvoice.value = row;
+  showDetail.value = true;
+}
+
+const showSubDetail = ref(false);
+const selectedSubInvoice = ref(null);
+const selectedSubInvoiceCompany = ref(null);
+function openSubDetail(row, companyRow) {
+  selectedSubInvoice.value = row;
+  selectedSubInvoiceCompany.value = companyRow; // NEW
+  showSubDetail.value = true;
+}
 
 const CurrencyOption = [
   { label: "USD", value: "USD" },
@@ -123,7 +140,7 @@ async function handleSaveBranch() {
         company_id: branchform.company_id,
         name: branchform.name,
         address: branchform.address,
-        phone: branchform.phone
+        phone: branchform.phone,
       };
       await addbranch(payload);
       notify.success("បង្កើតសាខាបានជោគជ័យ");
@@ -142,7 +159,7 @@ async function handleSaveBranch() {
 const branchcolumns = [
   { prop: "name", slot: "name", label: "ឈ្មោះ", minwidth: 120 },
   { prop: "address", label: "ទីតាំងសាខា", minwidth: 120 },
-   {prop: "phone", label: "លេខទូរសព្ទសាខា", minwidth: 120 },
+  { prop: "phone", label: "លេខទូរសព្ទសាខា", minwidth: 120 },
   { slot: "status", label: "ស្ថានភាព", width: 120 },
 ];
 
@@ -228,7 +245,7 @@ const userform = reactive({
   role_id: null,
   manage_branch: "ONE",
   branch_ids: [],
-  status: ''
+  status: "",
 });
 
 const userRules = {
@@ -257,13 +274,12 @@ function openEditUser(companyRow, branchRow, userRow) {
   userform.name = userRow.name || "";
   userform.role_id = userRow.role_id || null;
   userform.manage_branch = userRow.manage_branch || "ONE";
-  userform.status = userRow.status
+  userform.status = userRow.status;
   userform.branch_ids = Array.isArray(userRow.branch_ids)
     ? userRow.branch_ids.map((b) => b.branch_id)
     : [];
   userDialogVisible.value = true;
 }
-
 
 async function handleSaveUser() {
   await userFormRef.value.validate();
@@ -275,7 +291,7 @@ async function handleSaveUser() {
       name: userform.name,
       role_id: userform.role_id,
       manage_branch: userform.manage_branch,
-      status: userform.status
+      status: userform.status,
     };
     // only send branch_ids when it's actually needed — matches
     // input.ManageBranch == MULTIPLE check on the Go side
@@ -369,9 +385,9 @@ async function handleSave() {
   }
 }
 
-onMounted(()=>{
+onMounted(() => {
   fetchCompanies();
-   fetchRoles();
+  fetchRoles();
 });
 </script>
 
@@ -434,118 +450,267 @@ onMounted(()=>{
               @click="openCreateBranch(row)"
             />
           </el-tooltip>
+          <el-tooltip content="មើលលំអិត" placement="top">
+            <AppButton
+              size="small"
+              icon="View"
+              type="success"
+              circle
+              @click="openDetail(row)"
+            />
+          </el-tooltip>
         </template>
 
-      <template #expand="{ row: companyRow }">
-  <el-divider content-position="left">
-    <el-text>
-      សាខាសរុប {{ companyRow.branches.length }}
-      <el-tooltip content="ថែមសាខា" placement="top">
-        <AppButton
-          v-if="canAddBranch"
-          circle
-          size="small"
-          type="primary"
-          icon="Plus"
-          @click="openCreateBranch(companyRow)"
-        />
-      </el-tooltip>
-    </el-text>
-  </el-divider>
+        <template #expand="{ row: companyRow }">
+          <el-divider content-position="left">
+            <el-text>
+              សាខាសរុប {{ companyRow.branches.length }}
+              <el-tooltip content="ថែមសាខា" placement="top">
+                <AppButton
+                  v-if="canAddBranch"
+                  circle
+                  size="small"
+                  type="primary"
+                  icon="Plus"
+                  @click="openCreateBranch(companyRow)"
+                />
+              </el-tooltip>
+            </el-text>
+          </el-divider>
 
-  <AppTable
-    expandable
-    :data="companyRow.branches"
-    :columns="branchcolumns"
-    :show-pagination="false"
-  >
-    <template #status="{ row: branchRow }">
-      <el-text :type="branchRow.status === 'ACTIVE' ? 'success' : 'danger'" size="small">
-        {{ branchRow.status }}
-      </el-text>
-    </template>
+          <AppTable
+            expandable
+            :data="companyRow.branches"
+            :columns="branchcolumns"
+            :show-pagination="false"
+          >
+            <template #status="{ row: branchRow }">
+              <el-text
+                :type="branchRow.status === 'ACTIVE' ? 'success' : 'danger'"
+                size="small"
+              >
+                {{ branchRow.status }}
+              </el-text>
+            </template>
 
-    <template #name="{ row: branchRow }">
-      <el-text>
-        {{ branchRow.name }} |
-        <el-text size="small" type="primary">{{ branchRow.code }}</el-text>
-      </el-text>
-    </template>
+            <template #name="{ row: branchRow }">
+              <el-text>
+                {{ branchRow.name }} |
+                <el-text size="small" type="primary">{{
+                  branchRow.code
+                }}</el-text>
+              </el-text>
+            </template>
 
-    <template #actions="{ row: branchRow }">
-      <el-tooltip content="កែប្រែ" placement="top">
-        <AppButton
-          v-if="canEditBranch"
-          size="small"
-          icon="Edit"
-          type="warning"
-          circle
-          @click="openEditBranch(companyRow, branchRow)"
-        />
-      </el-tooltip>
-          <el-tooltip content="ថែមបុគ្គលិក" placement="top">
-            <AppButton
-              v-if="canAddUser"
-              circle
-              size="small"
-              type="primary"
-              icon="Plus"
-              @click="openCreateUser(companyRow, branchRow)"
-            />
-          </el-tooltip>
-    </template>
+            <template #actions="{ row: branchRow }">
+              <el-tooltip content="កែប្រែ" placement="top">
+                <AppButton
+                  v-if="canEditBranch"
+                  size="small"
+                  icon="Edit"
+                  type="warning"
+                  circle
+                  @click="openEditBranch(companyRow, branchRow)"
+                />
+              </el-tooltip>
+              <el-tooltip content="ថែមបុគ្គលិក" placement="top">
+                <AppButton
+                  v-if="canAddUser"
+                  circle
+                  size="small"
+                  type="primary"
+                  icon="Plus"
+                  @click="openCreateUser(companyRow, branchRow)"
+                />
+              </el-tooltip>
+            </template>
 
-    <template #expand="{ row: branchRow }">
-      <el-divider content-position="left">
-        <el-text>
-          បុគ្គលិកសរុប {{ branchRow.users.length }}
-          <el-tooltip content="ថែមបុគ្គលិក" placement="top">
-            <AppButton
-              v-if="canAddUser"
-              circle
-              size="small"
-              type="primary"
-              icon="Plus"
-              @click="openCreateUser(companyRow, branchRow)"
-            />
-          </el-tooltip>
-        </el-text>
-      </el-divider>
+            <template #expand="{ row: branchRow }">
+              <el-divider content-position="left">
+                <el-text>
+                  បុគ្គលិកសរុប {{ branchRow.users.length }}
+                  <el-tooltip content="ថែមបុគ្គលិក" placement="top">
+                    <AppButton
+                      v-if="canAddUser"
+                      circle
+                      size="small"
+                      type="primary"
+                      icon="Plus"
+                      @click="openCreateUser(companyRow, branchRow)"
+                    />
+                  </el-tooltip>
+                </el-text>
+              </el-divider>
 
+              <AppTable
+                expandable
+                :data="branchRow.users"
+                :columns="usercolumns"
+                :show-pagination="false"
+              >
+                <template #manage_branch="{ row: userRow }">
+                  <el-text>
+                    {{ userRow.manage_branch }}
+                    <template v-if="userRow.manage_branch === 'MULTIPLE'">
+                      |
+                      <el-text size="small" type="primary">
+                        {{
+                          getBranchNames(
+                            companyRow,
+                            Array.isArray(userRow.branch_ids)
+                              ? userRow.branch_ids.map((b) => b.branch_id)
+                              : [],
+                          ).join(", ")
+                        }}
+                      </el-text>
+                    </template>
+                  </el-text>
+                </template>
+
+                <template #role_name="{ row: userRow }">
+                  <el-text>
+                    {{ userRow.role_display_name }} |
+                    <el-text size="small" type="primary">{{
+                      userRow.role_name
+                    }}</el-text>
+                  </el-text>
+                </template>
+
+                <template #status="{ row: userRow }">
+                  <el-text
+                    :type="userRow.status === 'ACTIVE' ? 'success' : 'danger'"
+                    size="small"
+                  >
+                    {{ userRow.status }}
+                  </el-text>
+                </template>
+
+                <template #actions="{ row: userRow }">
+                  <el-tooltip content="កែប្រែ" placement="top">
+                    <AppButton
+                      v-if="canEditUser"
+                      size="small"
+                      icon="Edit"
+                      type="warning"
+                      circle
+                      @click="openEditUser(companyRow, branchRow, userRow)"
+                    />
+                  </el-tooltip>
+                </template>
+              </AppTable>
+            </template>
+          </AppTable>
+        </template>
+      </AppTable>
+    </el-card>
+
+    <AppDialog
+      v-model="showDetail"
+      title="សាខា"
+      width="60%"
+      :showDefaultFooter="false"
+    >
       <AppTable
         expandable
-        :data="branchRow.users"
+        :data="selectedInvoice?.branches || []"
+        :columns="branchcolumns"
+        :show-pagination="false"
+      >
+        <template #status="{ row: branchRow }">
+          <el-text
+            :type="branchRow.status === 'ACTIVE' ? 'success' : 'danger'"
+            size="small"
+          >
+            {{ branchRow.status }}
+          </el-text>
+        </template>
+
+        <template #name="{ row: branchRow }">
+          <el-text>
+            {{ branchRow.name }} |
+            <el-text size="small" type="primary">{{ branchRow.code }}</el-text>
+          </el-text>
+        </template>
+
+        <template #actions="{ row: branchRow }">
+          <el-tooltip content="កែប្រែ" placement="top">
+            <AppButton
+              v-if="canEditBranch"
+              size="small"
+              icon="Edit"
+              type="warning"
+              circle
+              @click="openEditBranch(selectedInvoice, branchRow)"
+            />
+          </el-tooltip>
+          <el-tooltip content="ថែមបុគ្គលិក" placement="top">
+            <AppButton
+              v-if="canAddUser"
+              circle
+              size="small"
+              type="primary"
+              icon="Plus"
+              @click="openCreateUser(selectedInvoice, branchRow)"
+            />
+          </el-tooltip>
+          <el-tooltip content="មើលលំអិត" placement="top">
+            <AppButton
+              size="small"
+              icon="View"
+              type="success"
+              circle
+              @click="openSubDetail(branchRow, selectedInvoice)"
+            />
+          </el-tooltip>
+        </template>
+      </AppTable>
+    </AppDialog>
+
+    <AppDialog
+      v-model="showSubDetail"
+      title="បុគ្គលិក"
+      width="60%"
+      :showDefaultFooter="false"
+    >
+      <AppTable
+        expandable
+        :data="selectedSubInvoice?.users || []"
         :columns="usercolumns"
         :show-pagination="false"
       >
-<template #manage_branch="{ row: userRow }">
-  <el-text>
-    {{ userRow.manage_branch }}
-    <template v-if="userRow.manage_branch === 'MULTIPLE'">
-      |
-      <el-text size="small" type="primary">
-        {{
-          getBranchNames(
-            companyRow,
-            Array.isArray(userRow.branch_ids)
-              ? userRow.branch_ids.map((b) => b.branch_id)
-              : []
-          ).join(', ')
-        }}
-      </el-text>
-    </template>
-  </el-text>
-</template>
+        <template #manage_branch="{ row: userRow }">
+          <el-text>
+            {{ userRow.manage_branch }}
+            <template v-if="userRow.manage_branch === 'MULTIPLE'">
+              |
+              <el-text size="small" type="primary">
+                {{
+                  getBranchNames(
+                    companyRow,
+                    Array.isArray(userRow.branch_ids)
+                      ? userRow.branch_ids.map((b) => b.branch_id)
+                      : [],
+                  ).join(", ")
+                }}
+              </el-text>
+            </template>
+          </el-text>
+        </template>
 
         <template #role_name="{ row: userRow }">
           <el-text>
             {{ userRow.role_display_name }} |
-            <el-text size="small" type="primary">{{ userRow.role_name }}</el-text>
+            <el-text size="small" type="primary">{{
+              userRow.role_name
+            }}</el-text>
           </el-text>
         </template>
 
         <template #status="{ row: userRow }">
-          <el-text :type="userRow.status === 'ACTIVE' ? 'success' : 'danger'" size="small">
+          <el-text
+            :type="userRow.status === 'ACTIVE' ? 'success' : 'danger'"
+            size="small"
+          >
             {{ userRow.status }}
           </el-text>
         </template>
@@ -558,16 +723,18 @@ onMounted(()=>{
               icon="Edit"
               type="warning"
               circle
-              @click="openEditUser(companyRow, branchRow, userRow)"
+              @click="
+                openEditUser(
+                  selectedSubInvoiceCompany,
+                  selectedSubInvoice,
+                  userRow,
+                )
+              "
             />
           </el-tooltip>
         </template>
       </AppTable>
-    </template>
-  </AppTable>
-</template>
-      </AppTable>
-    </el-card>
+    </AppDialog>
 
     <AppDialog
       v-model="dialogVisible"
@@ -654,60 +821,60 @@ onMounted(()=>{
       </AppForm>
     </AppDialog>
 
-  <AppDialog
-  v-model="userDialogVisible"
-  :title="isEditUser ? 'កែប្រែបុគ្គលិក' : 'បន្ថែមបុគ្គលិក'"
-  width="500px"
-  :showDefaultFooter="false"
->
-  <AppForm
-    ref="userFormRef"
-    :model="userform"
-    :rules="userRules"
-    :show-actions="true"
-    @submit="handleSaveUser"
-    submitText="រក្សាទុក"
-  >
-    <AppInput
-      label="ឈ្មោះ"
-      prop="name"
-      v-model="userform.name"
-      placeholder="បញ្ចូលឈ្មោះបុគ្គលិក"
-    />
+    <AppDialog
+      v-model="userDialogVisible"
+      :title="isEditUser ? 'កែប្រែបុគ្គលិក' : 'បន្ថែមបុគ្គលិក'"
+      width="500px"
+      :showDefaultFooter="false"
+    >
+      <AppForm
+        ref="userFormRef"
+        :model="userform"
+        :rules="userRules"
+        :show-actions="true"
+        @submit="handleSaveUser"
+        submitText="រក្សាទុក"
+      >
+        <AppInput
+          label="ឈ្មោះ"
+          prop="name"
+          v-model="userform.name"
+          placeholder="បញ្ចូលឈ្មោះបុគ្គលិក"
+        />
 
-    <AppSelect
-      v-model="userform.role_id"
-      :options="roleOptions"
-      label="តួនាទី"
-      prop="role_id"
-      placeholder="ជ្រើសរើសតួនាទី"
-      clearable
-    />
+        <AppSelect
+          v-model="userform.role_id"
+          :options="roleOptions"
+          label="តួនាទី"
+          prop="role_id"
+          placeholder="ជ្រើសរើសតួនាទី"
+          clearable
+        />
 
-    <AppSelect
-      v-model="userform.manage_branch"
-      :options="ManageBranchOption"
-      label="សិទ្ធិមើលសាខា"
-      prop="manage_branch"
-    />
+        <AppSelect
+          v-model="userform.manage_branch"
+          :options="ManageBranchOption"
+          label="សិទ្ធិមើលសាខា"
+          prop="manage_branch"
+        />
 
-    <AppSelect
-      v-if="userform.manage_branch === 'MULTIPLE'"
-      v-model="userform.branch_ids"
-      :options="branchOptions"
-      label="សាខា"
-      prop="branch_ids"
-      placeholder="ជ្រើសរើសសាខា"
-      multiple
-      clearable
-    />
-    <AppSelect
-      v-model="userform.status"
-      :options="UserStatusOption"
-      label="ស្ថានភាព"
-    />
-  </AppForm>
-</AppDialog>
+        <AppSelect
+          v-if="userform.manage_branch === 'MULTIPLE'"
+          v-model="userform.branch_ids"
+          :options="branchOptions"
+          label="សាខា"
+          prop="branch_ids"
+          placeholder="ជ្រើសរើសសាខា"
+          multiple
+          clearable
+        />
+        <AppSelect
+          v-model="userform.status"
+          :options="UserStatusOption"
+          label="ស្ថានភាព"
+        />
+      </AppForm>
+    </AppDialog>
   </div>
 </template>
 

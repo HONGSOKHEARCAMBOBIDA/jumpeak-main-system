@@ -244,7 +244,6 @@ onMounted(() => {
 <AppSelect
             v-model="filters.company_id"
             :options="companyoptions"
-            label="ក្រុមហ៑ុន"
             size="large"
             placeholder="ក្រុមហ៑ុន"
             clearable
@@ -254,7 +253,6 @@ onMounted(() => {
 <AppSelect
             v-model="filters.branch_id"
             :options="branchoptions"
-            label="សាខា"
               size="large"
             placeholder="សាខា"
             clearable

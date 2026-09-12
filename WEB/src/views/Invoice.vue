@@ -22,6 +22,13 @@ import PrintableTable from "../../components/PrintableTable.vue"; // adjust path
 const notify = useNotification();
 const userDataStore = useUserDataStore();
 
+const showDetail = ref(false);
+const selectedInvoice = ref(null);
+
+function openDetail(row) {
+  selectedInvoice.value = row;
+  showDetail.value = true;
+}
 const invoices = ref([]);
 const loading = ref(false);
 const useloading = useLoading();
@@ -57,8 +64,8 @@ const invoiceitemcolumns = [
   { slot: "subtotal", label: "តម្លៃសរុប", minwidth: 120 },
   { prop: "description", label: "ផ្សេងៗ", minwidth: 120 },
 ];
-const printableRef = ref(null)
-const printRows = ref([])
+const printableRef = ref(null);
+const printRows = ref([]);
 const invoiceitemPrintcolumns = [
   { key: "product_Name", label: "មុខទំនិញ", minwidth: 120 },
   { key: "quantity", label: "ចំនួន", minwidth: 120 },
@@ -66,30 +73,30 @@ const invoiceitemPrintcolumns = [
   { key: "discount_amount", label: "បញ្ចុះតម្លៃ", minwidth: 120 },
   { key: "subtotal", label: "តម្លៃសរុប", minwidth: 120 },
   { key: "description", label: "ផ្សេងៗ", minwidth: 120 },
-]
-const printInvoiceNumber = ref("")
-const companyname = ref("")
-const branchname = ref("")
-const total_amount = ref(null)
-const paid_amount = ref(null)
-const outstanding_amount = ref(null)
-const customer = ref("")
-const currency = ref("")
-const phone = ref("")
+];
+const printInvoiceNumber = ref("");
+const companyname = ref("");
+const branchname = ref("");
+const total_amount = ref(null);
+const paid_amount = ref(null);
+const outstanding_amount = ref(null);
+const customer = ref("");
+const currency = ref("");
+const phone = ref("");
 function printInvoiceList(invoice, invoiceitem) {
-  printRows.value = invoice.invoice_item || []
-  printInvoiceNumber.value = invoice.invoice_number || ""
-  companyname.value = invoice.company_Name || ""
-  branchname.value = invoice.branch_Name || ""
-  total_amount.value = invoice.total_amount || 0
-  currency.value = invoice.currency_code || 0
-  paid_amount.value = invoice.paid_amount || 0
-  customer.value = invoice.customer_name || ""
-  phone.value = invoice.branch_phone || ""
-  outstanding_amount.value = invoice.outstanding_amount
+  printRows.value = invoice.invoice_item || [];
+  printInvoiceNumber.value = invoice.invoice_number || "";
+  companyname.value = invoice.company_Name || "";
+  branchname.value = invoice.branch_Name || "";
+  total_amount.value = invoice.total_amount || 0;
+  currency.value = invoice.currency_code || 0;
+  paid_amount.value = invoice.paid_amount || 0;
+  customer.value = invoice.customer_name || "";
+  phone.value = invoice.branch_phone || "";
+  outstanding_amount.value = invoice.outstanding_amount;
   nextTick(() => {
-    printableRef.value?.print()
-  })
+    printableRef.value?.print();
+  });
 }
 
 const getStatusLabel = (status) => {
@@ -138,8 +145,6 @@ async function searchProducts(query) {
     productSearching.value = false;
   }
 }
-
-
 
 // --- create form ---
 function blankItem() {
@@ -234,7 +239,7 @@ async function fetchInvoices() {
 function openCreate() {
   form.customer_id = null;
   form.branch_id = null;
-  form.invoice_date = new Date().toISOString().split('T')[0];
+  form.invoice_date = new Date().toISOString().split("T")[0];
   form.due_date = "";
   form.currency_code = "KHR";
   form.exchange_rate_to_base = 1;
@@ -353,7 +358,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.customer_id"
           :options="customerOptions"
-          label="អតិថិជន"
           placeholder="អតិថិជន"
           size="large"
           filterable
@@ -368,7 +372,6 @@ onMounted(() => {
         <AppSelect
           v-model="filters.status"
           :options="StatusOption"
-          label="ស្ថានភាព"
           size="large"
           placeholder="ស្ថានភាព"
           clearable
@@ -397,7 +400,7 @@ onMounted(() => {
         v-model:page-size="pageSize"
         :total="total"
         @page-change="fetchInvoices"
-        actions-width="120px"
+        actions-width="150px"
         :columns="[
           { prop: 'invoice_number', label: 'លេខវិក័យបត្រ', minWidth: 140 },
           { prop: 'customer_name', label: 'អតិថិជន', minWidth: 150 },
@@ -476,6 +479,16 @@ onMounted(() => {
               @click="printInvoiceList(row, row.invoice_item)"
             />
           </el-tooltip>
+          <el-tooltip content="មើលលំអិត" placement="top">
+            <AppButton
+             
+              size="small"
+              icon="View"
+              type="success"
+              circle
+              @click="openDetail(row)"
+            />
+          </el-tooltip>
         </template>
         <template #expand="{ row: item }">
           <el-divider content-position="left">
@@ -487,24 +500,49 @@ onMounted(() => {
             :columns="invoiceitemcolumns"
             :show-pagination="false"
           >
-          <template #unit_price="{row:item}">
-            <el-text>{{ item.unit_price }}{{ item.currency_code }}</el-text>
-          </template>
-          <template #discount_amount="{row:item}">
-            <el-text>{{ item.discount_amount }}{{ item.currency_code }}</el-text>
-          </template>
-          <template #subtotal="{row:item}">
-            <el-text>{{ item.subtotal }}{{ item.currency_code }}</el-text>
-          </template>
+            <template #unit_price="{ row: item }">
+              <el-text>{{ item.unit_price }}{{ item.currency_code }}</el-text>
+            </template>
+            <template #discount_amount="{ row: item }">
+              <el-text
+                >{{ item.discount_amount }}{{ item.currency_code }}</el-text
+              >
+            </template>
+            <template #subtotal="{ row: item }">
+              <el-text>{{ item.subtotal }}{{ item.currency_code }}</el-text>
+            </template>
           </AppTable>
         </template>
       </AppTable>
     </el-card>
 
     <AppDialog
+      v-model="showDetail"
+      title="លំអិតវិក័យបត្រ"
+      width="40%"
+      :showDefaultFooter="false"
+    >
+      <AppTable
+        :data="selectedInvoice?.invoice_item || []"
+        :columns="invoiceitemcolumns"
+        :show-pagination="false"
+      >
+        <template #unit_price="{ row: item }">
+          {{ item.unit_price }} {{ item.currency_code }}
+        </template>
+
+        <template #discount_amount="{ row: item }">
+          {{ item.discount_amount }} {{ item.currency_code }}
+        </template>
+
+        <template #subtotal="{ row: item }">
+          {{ item.subtotal }} {{ item.currency_code }}
+        </template>
+      </AppTable>
+    </AppDialog>
+    <AppDialog
       v-model="dialogVisible"
       title="បង្កើតវិក័យបត្រ"
-      
       width="65%"
       :showDefaultFooter="false"
     >
@@ -516,8 +554,6 @@ onMounted(() => {
         @submit="handleSave"
         submitText="រក្សាទុក"
       >
-     
-
         <el-row :gutter="16">
           <el-col :span="8">
             <AppSelect
@@ -683,20 +719,20 @@ onMounted(() => {
   </div>
 
   <div class="print-only-wrapper">
-<PrintableTable
-  ref="printableRef"
-  :title="`វិក័យបត្រលេខ ${printInvoiceNumber}`"
-  :company="`${companyname}`"
-  :branch="`${branchname}`"
-  :total_amount="`${total_amount}`"
-  :currency="`${currency}`"
-  :paid_amount="`${paid_amount}`"
-  :outstanding_amount="`${outstanding_amount}`"
-  :customer="`${customer}`"
-  :phone="`${phone}`"
-  :columns="invoiceitemPrintcolumns"
-  :rows="printRows"
-/>
+    <PrintableTable
+      ref="printableRef"
+      :title="`វិក័យបត្រលេខ ${printInvoiceNumber}`"
+      :company="`${companyname}`"
+      :branch="`${branchname}`"
+      :total_amount="`${total_amount}`"
+      :currency="`${currency}`"
+      :paid_amount="`${paid_amount}`"
+      :outstanding_amount="`${outstanding_amount}`"
+      :customer="`${customer}`"
+      :phone="`${phone}`"
+      :columns="invoiceitemPrintcolumns"
+      :rows="printRows"
+    />
   </div>
 </template>
 
