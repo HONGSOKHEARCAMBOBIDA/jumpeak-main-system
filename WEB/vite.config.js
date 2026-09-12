@@ -7,7 +7,7 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'https://api-jompeak-dev.hearpaytrack.uk',
+        target: 'https://api-jompeak-khmer-dev.hearpaytrack.uk',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, '')
       }
