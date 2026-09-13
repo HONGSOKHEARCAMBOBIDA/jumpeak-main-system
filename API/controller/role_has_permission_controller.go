@@ -1,7 +1,10 @@
 package controller
 
 import (
+	"context"
+	"errors"
 	"mysql/constant/share"
+	"mysql/helper"
 	"mysql/request"
 	"mysql/service"
 	"net/http"
@@ -53,12 +56,25 @@ func (cr *RoleHasPermissionController) GetRolePermission(c *gin.Context) {
 		share.ResponseError(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	data, err := cr.service.GetRolePermission(c, id)
-	if err != nil {
-		share.ResponseError(c, http.StatusBadRequest, err.Error())
+	page, pageSize := helper.GetPagination(c)
+	userID, ok := helper.GetUserID(c)
+	if !ok {
 		return
 	}
-	share.RespondDate(c, http.StatusOK, data)
+	data, meta, err := cr.service.GetRolePermission(c.Request.Context(), id, userID, request.Pagination{
+		Page:     page,
+		PageSize: pageSize,
+	})
+
+	if err != nil {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+			share.ResponseError(c, http.StatusGatewayTimeout, err.Error())
+			return
+		}
+		share.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	share.ResponsePagination(c, 200, data, meta)
 
 }
 

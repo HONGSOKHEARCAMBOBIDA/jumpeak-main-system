@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"mysql/config"
+	"mysql/helper"
 	"mysql/model"
 	"mysql/request"
 	"mysql/response"
@@ -15,7 +16,7 @@ import (
 type RoleService interface {
 	CreateRoleHasPermission(ctx context.Context, input request.CreateRolePermissionInput) error
 	DeleteRoleHasPermission(ctx context.Context, input request.DeleteRolePermissionsInput) error
-	GetRolePermission(ctx context.Context, id int) ([]response.PermissionWithAssignedRole, error)
+	GetRolePermission(ctx context.Context, id int, userID int, pf request.Pagination) ([]response.PermissionWithAssignedRole, *model.PaginationMetadata, error)
 	UpdateRole(ctx context.Context, id int, input request.RoleRequestUpdate) error
 }
 
@@ -75,33 +76,45 @@ func (s *roleservice) DeleteRoleHasPermission(ctx context.Context, input request
 	return tx.Commit().Error
 }
 
-func (s *roleservice) GetRolePermission(ctx context.Context, id int) ([]response.PermissionWithAssignedRole, error) {
+func (s *roleservice) GetRolePermission(ctx context.Context, id int, userID int, pf request.Pagination) ([]response.PermissionWithAssignedRole, *model.PaginationMetadata, error) {
+	helper.NormalizePagination(&pf)
+	var permissions []response.PermissionWithAssignedRole
+	var total int64
 	if id <= 0 {
-		return nil, fmt.Errorf("invalid role id: %d", id)
+		return nil, nil, fmt.Errorf("invalid role id: %d", id)
 	}
 
-	var permissions []response.PermissionWithAssignedRole
-	err := s.db.WithContext(ctx).Table("permission p").
-		Select(`
-            p.id AS id,
-            p.name AS name,
-            p.display_name AS display_name,
-            CASE 
-                WHEN role_permission.permission_id IS NULL THEN false 
-                ELSE true 
-            END AS assigned
-        `).
-		Joins(`
-            LEFT JOIN role_permission 
-            ON p.id = role_permission.permission_id 
-            AND role_permission.role_id = ?
-        `, id).
-		Order("p.id ASC").
-		Scan(&permissions).Error
-	if err != nil {
-		return nil, err
+	base := func() *gorm.DB {
+		return s.db.WithContext(ctx).
+			Table("permission p").
+			Joins("LEFT JOIN role_permission rp ON p.id = rp.permission_id").
+			Where("rp.role_id = ?", id)
 	}
-	return permissions, nil
+
+	if err := base().Count(&total).Error; err != nil {
+		return nil, nil, fmt.Errorf("count permission: %w", err)
+	}
+
+	if total == 0 {
+		return []response.PermissionWithAssignedRole{}, helper.BuildPaginationMeta(pf, total), nil
+	}
+
+	offset := (pf.Page - 1) * pf.PageSize
+
+	dataQuery := base().Select(`
+		p.id AS id,
+		p.name AS name,
+		p.display_name AS display_name,
+		CASE 
+			WHEN rp.permission_id IS NULL THEN false
+			ELSE true
+		END AS assigned
+	`)
+
+	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Scan(&permissions).Error; err != nil {
+		return nil, nil, fmt.Errorf("fetch permission: %w", err)
+	}
+	return permissions, helper.BuildPaginationMeta(pf, total), nil
 }
 
 func (s *roleservice) UpdateRole(ctx context.Context, id int, input request.RoleRequestUpdate) error {

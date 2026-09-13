@@ -7,7 +7,6 @@ import {
   cancelinvoice,
   getcustomer,
   getproduct,
-  getbranchnopagination,
 } from "../api/services.js";
 import AppTable from "../../components/AppTable.vue";
 import AppButton from "../../components/AppButton.vue";
@@ -721,7 +720,7 @@ onMounted(() => {
   <div class="print-only-wrapper">
     <PrintableTable
       ref="printableRef"
-      :title="`វិក័យបត្រលេខ ${printInvoiceNumber}`"
+      :title="`លេខ ${printInvoiceNumber}`"
       :company="`${companyname}`"
       :branch="`${branchname}`"
       :total_amount="`${total_amount}`"

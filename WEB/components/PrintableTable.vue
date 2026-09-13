@@ -11,8 +11,7 @@
         </el-col>
 
         <el-col :span="16">
-          <h3 class="title-kh">ព្រះរាជាណាចក្រកម្ពុជា</h3>
-          <h4 class="subtitle-kh">ជាតិ សាសនា ព្រះមហាក្សត្រ</h4>
+          <h3 class="title-kh">វិក័យប័ត្រ</h3>
           <el-image :src="taktieng" class="taktieng-logo" />
           <h3 class="title-doc">{{ title }}</h3>
         </el-col>
@@ -193,7 +192,7 @@ th {
 }
 
 .title-kh {
-  font-size: 18px;
+  font-size: 25px;
 }
 
 .subtitle-kh {
