@@ -89,7 +89,7 @@ async function handleLogin() {
     notify.success("ចូលប្រព័ន្ធបានជោគជ័យ")
   } catch (e) {
     notify.error(e.response?.data?.message || "Login failed");
-    console.log(e.response?.data?.message)
+    console.log(e)
   } finally {
     loading.value = false;
   }
