@@ -31,7 +31,7 @@ export const deleteBackup = (filename) => api.delete('delete.backup',{
 })
 
 // RoleHasPermission
-export const getrolehaspermission = (id) => api.get(`/view.role.has.permission/${id}`)
+export const getrolehaspermission = (id,params) => api.get(`/view.role.has.permission/${id}`,{params})
 export const addrolehaspermission = (data) => api.post('/add.role.has.permission',data)
 export const deleterolehaspermission = (data) => api.delete('/delete.role.has.permission',{data})
 export const editrole = (id,data) => api.put(`/edit.role/${id}`,data)

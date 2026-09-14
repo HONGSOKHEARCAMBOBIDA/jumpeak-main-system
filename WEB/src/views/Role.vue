@@ -26,6 +26,9 @@ const selectroleID = ref(null);
 const total = ref(0);
 const searchKeyword = ref("");
 
+const page = ref(1);
+const pageSize = ref(10);
+
 // reactive object សម្រាប់ form (មិនមែន factory function ទេ)
 const roleForm = reactive({
   id: null,
@@ -67,9 +70,13 @@ async function fetchrole() {
 async function fetchrolehaspermission() {
   loading.value = true;
   try {
-    const res = await getrolehaspermission(selectroleID.value);
+    const params = {
+      page: page.value,
+      page_size: pageSize.value,
+    };
+    const res = await getrolehaspermission(selectroleID.value,params);
     rolehaspermission.value = res.data.data || [];
-    total.value = rolehaspermission.value.length;
+    total.value = res.data.pagination?.totalCount || 0;
   } catch (e) {
     notify.error(e.response?.data?.error || "មានបញ្ហាក្នុងការទាញយកទិន្នន័យ");
   } finally {
@@ -207,8 +214,11 @@ onMounted(() => {
       <AppTable
         :data="rolehaspermission"
         :loading="loading"
+        v-model:current-page="page"
+        v-model:page-size="pageSize"
         show-index
         :total="total"
+        @page-change="fetchrolehaspermission"
         empty-text="មិនមានសិទ្ធិណាមួយទេ"
         :columns="[
           { prop: 'name', label: 'ឈ្មោះ', minWidth: 110 },
