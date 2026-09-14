@@ -107,19 +107,29 @@ const customerOptions = ref([]);
 const customerSearching = ref(false);
 async function searchCustomers(query) {
   customerSearching.value = true;
+
+
   try {
-    const res = await getcustomer({
+    const params = {
       page: 1,
       page_size: 20,
-      name: query || "",
-    });
+    };
+
+    if (query.trim()) {
+      params.name = query.trim();
+    }
+
+    const res = await getcustomer(params);
+
     customerOptions.value = (res.data.data || []).map((c) => ({
       label: `${c.name} (${c.customer_code}) | ${c.status}`,
       value: c.id,
       raw: c,
     }));
   } catch (e) {
-    notify.error(e?.response?.data?.error || "Failed to search customers");
+    notify.error(
+      e?.response?.data?.error || "Failed to search customers"
+    );
   } finally {
     customerSearching.value = false;
   }
@@ -130,8 +140,20 @@ const productOptions = ref([]);
 const productSearching = ref(false);
 async function searchProducts(query) {
   productSearching.value = true;
+
+
+
   try {
-    const res = await getproduct({ page: 1, page_size: 20, name: query || "" });
+    const params = {
+      page: 1,
+      page_size: 20,
+    };
+      if (query.trim()) {
+      params.name = query.trim();
+    }
+    const res = await getproduct(params);
+
+
     productOptions.value = (res.data.data || []).map((p) => ({
       default_price: p.default_price,
       label: p.name,
@@ -139,7 +161,9 @@ async function searchProducts(query) {
       raw: p,
     }));
   } catch (e) {
-    notify.error(e?.response?.data?.error || "Failed to search products");
+    notify.error(
+      e?.response?.data?.error || "Failed to search products"
+    );
   } finally {
     productSearching.value = false;
   }
@@ -243,8 +267,8 @@ function openCreate() {
   form.currency_code = "KHR";
   form.exchange_rate_to_base = 1;
   items.value = [blankItem()];
-  searchCustomers("");
-  searchProducts("");
+  // searchCustomers();
+  // searchProducts();
   dialogVisible.value = true;
 }
 
@@ -331,7 +355,6 @@ watch(
 
 onMounted(() => {
   fetchInvoices();
-  searchCustomers("");
 });
 </script>
 
@@ -342,7 +365,6 @@ onMounted(() => {
         { slot: 'invoice_number', span: 5 },
         { slot: 'customer', span: 6 },
         { slot: 'status', span: 5 },
-        { slot: 'create', span: 4 },
       ]"
     >
       <template #invoice_number>
@@ -377,7 +399,7 @@ onMounted(() => {
           @change="fetchInvoices"
         />
       </template>
-      <template #create>
+      <template #actions>
         <AppButton
           v-if="canAddInvoice"
           type="primary"
@@ -480,7 +502,6 @@ onMounted(() => {
           </el-tooltip>
           <el-tooltip content="មើលលំអិត" placement="top">
             <AppButton
-             
               size="small"
               icon="View"
               type="success"
@@ -553,31 +574,29 @@ onMounted(() => {
         @submit="handleSave"
         submitText="រក្សាទុក"
       >
-        <el-row :gutter="16">
-          <el-col :span="8">
-            <AppSelect
-              v-model="form.customer_id"
-              :options="customerOptions"
-              label="អតិថិជន"
-              prop="customer_id"
-              size="large"
-              placeholder="ជ្រើសរើសអតិថិជន"
-              filterable
-              clearable
-              remote
-              :remote-method="searchCustomers"
-              :loading="customerSearching"
-            />
-          </el-col>
-          <el-col :span="8">
+        <AppSelect
+          v-model="form.customer_id"
+          :options="customerOptions"
+          label="អតិថិជន"
+          prop="customer_id"
+          size="large"
+          placeholder="អតិថិជន"
+          filterable
+          clearable
+          remote
+          :remote-method="searchCustomers"
+          :loading="customerSearching"
+        />
+        <el-row :gutter="20">
+          <el-col :span="12">
             <AppInput
               v-model="form.invoice_date"
-              label="កាលបរិច្ឆេទវិក័យបត្រ"
+              label="កាលបរិច្ឆេទ"
               prop="invoice_date"
               type="date"
             />
           </el-col>
-          <el-col :span="8">
+          <el-col :span="12">
             <AppInput
               v-model="form.due_date"
               label="ថ្ងៃកំណត់បង់"
@@ -612,8 +631,6 @@ onMounted(() => {
 
         <div class="item-rows">
           <div v-for="row in items" :key="row.key" class="item-row">
-            <el-row :gutter="10">
-              <el-col :span="6">
                 <AppSelect
                   v-model="row.product_id"
                   :options="productOptions"
@@ -627,15 +644,8 @@ onMounted(() => {
                   clearable
                   @change="onProductPicked(row)"
                 />
-              </el-col>
-              <el-col :span="6">
-                <AppInput
-                  v-model="row.description"
-                  placeholder="បរិយាយ"
-                  label="បរិយាយ"
-                />
-              </el-col>
-              <el-col :span="3">
+            <el-row :gutter="20">
+              <el-col :span="12">
                 <AppInput
                   v-model.number="row.quantity"
                   type="number"
@@ -643,7 +653,7 @@ onMounted(() => {
                   label="ចំនួន"
                 />
               </el-col>
-              <el-col :span="4">
+              <el-col :span="12">
                 <AppInput
                   v-model.number="row.unit_price"
                   type="number"
@@ -651,7 +661,9 @@ onMounted(() => {
                   label="តម្លៃរាយ"
                 />
               </el-col>
-              <el-col :span="3">
+            </el-row>
+            <el-row :gutter="20" align="middle">
+              <el-col :span="12">
                 <AppInput
                   v-model.number="row.discount_amount"
                   type="number"
@@ -659,25 +671,36 @@ onMounted(() => {
                   label="បញ្ចុះតម្លៃ"
                 />
               </el-col>
-              <el-col :span="2" class="item-subtotal">
+              <el-col :span="12" class="item-subtotal">
                 {{ itemSubtotal(row).toFixed(2) }} {{ form.currency_code }}
               </el-col>
-              <el-col :span="2">
-                <AppButton
-                  v-if="items.length > 1"
-                  size="small"
-                  icon="Delete"
-                  type="danger"
-                  circle
-                  @click="removeItemRow(row.key)"
+            </el-row>
+                <AppInput
+                  v-model="row.description"
+                  placeholder="បរិយាយ"
+                  label="បរិយាយ"
                 />
+            <el-row :gutter="20">
+              <el-col>
+                <AppButton
+                  :disabled="items.length <= 1"
+                  size="default"
+                  type="danger"
+                  @click="removeItemRow(row.key)"
+                  >លុប</AppButton
+                >
+
+                <AppButton size="default" type="success" @click="addItemRow"
+                  >ថែម</AppButton
+                >
               </el-col>
             </el-row>
+            <el-divider border-style="dashed" />
           </div>
         </div>
 
         <div class="item-actions">
-          <AppButton
+          <!-- <AppButton
             size="default"
             type="primary"
             plain
@@ -685,7 +708,7 @@ onMounted(() => {
             @click="addItemRow"
           >
             បន្ថែមមុខទំនិញ
-          </AppButton>
+          </AppButton> -->
           <el-text tag="b" size="large" style="color: black"
             >សរុប: {{ invoiceTotal.toFixed(2) }}
             {{ form.currency_code }}</el-text

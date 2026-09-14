@@ -49,13 +49,15 @@ async function fetchCompanyOptions() {
       value: a.id,
     }));
   } catch (e) {
-    notify.error(e?.response?.data?.message || e.message || "Failed to load company");
+    notify.error(
+      e?.response?.data?.message || e.message || "Failed to load company",
+    );
   }
 }
 
 const StatusOption = [
-  { label: "ACTIVE", value: "ACTIVE" },
-  { label: "INACTIVE", value: "INACTIVE" },
+  { label: "កំពុងលក់", value: "ACTIVE" },
+  { label: "ឈប់លក់", value: "INACTIVE" },
 ];
 
 // --- Create form: backend accepts an array of products (ProductRequestCreate.product) ---
@@ -146,7 +148,9 @@ async function handleSave() {
         .map((r) => ({
           name: r.name.trim(),
           default_price:
-            r.default_price === "" || r.default_price === null || isNaN(Number(r.default_price))
+            r.default_price === "" ||
+            r.default_price === null ||
+            isNaN(Number(r.default_price))
               ? 0
               : Number(r.default_price),
         }))
@@ -203,7 +207,6 @@ onMounted(() => {
       :fields="[
         { slot: 'name', span: 6 },
         { slot: 'company', span: 6 },
-        { slot: 'create', span: 4 },
       ]"
     >
       <template #name>
@@ -211,20 +214,18 @@ onMounted(() => {
           v-model="filters.name"
           placeholder="ស្វែងរកតាមឈ្មោះ"
           clearable
-          
         />
       </template>
       <template #company>
         <AppSelect
           v-model="filters.company_id"
           :options="companyoptions"
-          label="ក្រុមហ៊ុន"
           placeholder="ក្រុមហ៊ុន"
           clearable
           size="large"
         />
       </template>
-      <template #create>
+      <template #actions>
         <AppButton
           v-if="canAddProduct"
           type="primary"
@@ -239,6 +240,7 @@ onMounted(() => {
 
     <el-card class="table-card">
       <AppTable
+        show-index
         :data="products"
         :loading="loading"
         v-model:current-page="page"
@@ -246,19 +248,31 @@ onMounted(() => {
         :total="total"
         @page-change="fetchProducts"
         :columns="[
-          { prop: 'name', label: 'ឈ្មោះឥវ៉ាន់', minWidth: 180 },
+          { slot: 'name', label: 'មុខទំនិញ', minWidth: 180 },
           { slot: 'default_price', label: 'តម្លៃលក់រាយ', minWidth: 180 },
           { prop: 'company_name', label: 'ក្រុមហ៊ុន', minWidth: 150 },
           { label: 'ស្ថានភាព', slot: 'status', width: 120 },
         ]"
       >
-
-      <template #default_price="{row}">
-        <el-text>{{ row.default_price }} <el-text size="small">{{ row.company_currency }}</el-text></el-text>
-      </template>
+        <template #name="{ row }">
+          <el-text :tag="row.status === 'ACTIVE' ? 'b' : 'del'">
+            {{ row.name }}
+          </el-text>
+        </template>
+        <template #default_price="{ row }">
+          <el-text type="primary" tag="b"
+            >{{ row.default_price }}
+            <el-text type="primary" size="small">{{
+              row.company_currency
+            }}</el-text></el-text
+          >
+        </template>
         <template #status="{ row }">
-          <el-text :type="row.status === 'ACTIVE' ? 'success' : 'info'" size="small">
-            {{ row.status }}
+          <el-text
+            :type="row.status === 'ACTIVE' ? 'success' : 'info'"
+            size="small"
+          >
+            {{ row.status === "ACTIVE" ? "កំពុងលក់" : "ឈប់លក់" }}
           </el-text>
         </template>
 
@@ -299,7 +313,7 @@ onMounted(() => {
           prop="name"
           placeholder="បញ្ចូលឈ្មោះឥវ៉ាន់"
         />
-         <AppInput
+        <AppInput
           v-model.number="form.default_price"
           type="number"
           label="តម្លៃលក់រាយ"
@@ -316,50 +330,61 @@ onMounted(() => {
       </AppForm>
 
       <!-- CREATE: one or more products at once -->
+
       <div v-else class="create-rows">
-        <div v-for="row in createRows" :key="row.key">
-          <el-row :gutter="20">
-            <el-col :span="20">
-              <el-row :gutter="20">
-                <el-col :span="12">
-<AppInput
-            v-model="row.name"
-            
-            placeholder="បញ្ចូលឈ្មោះឥវ៉ាន់"
-          />
-                </el-col>
-                <el-col :span="12">
-<AppInput
-            v-model="row.default_price"
-            
-            placeholder="បញ្ចូលតម្លៃលក់រាយ"
-          />
-                </el-col>
-              </el-row>
+        <AppForm
+          :model="form"
+          :rules="rules"
+          :show-actions="true"
+          @submit="handleSave"
+          @reset="addRow"
+          reset-text="បន្ថែមមួយទៀត"
+          submit-text="រក្សាទុក"
+        >
+          <div v-for="row in createRows" :key="row.key">
+            <el-row :gutter="20">
+              <el-col :span="20">
+                <el-row :gutter="20">
+                  <el-col :span="12">
+                    <AppInput
+                      size="large"
+                      v-model="row.name"
+                      placeholder="បញ្ចូលឈ្មោះឥវ៉ាន់"
+                    />
+                  </el-col>
+                  <el-col :span="12">
+                    <AppInput
+                      type="number"
+                      size="large"
+                      v-model.number="row.default_price"
+                      placeholder="តម្លៃលក់រាយ"
+                    />
+                  </el-col>
+                </el-row>
+              </el-col>
+              <el-col :span="4">
+                <AppButton
+                  v-if="createRows.length > 1"
+                  size="small"
+                  icon="Delete"
+                  type="danger"
+                  circle
+                  @click="removeRow(row.key)"
+                />
+              </el-col>
+            </el-row>
+          </div>
+        </AppForm>
 
-            </el-col>
-            <el-col :span="4">
-          <AppButton
-            v-if="createRows.length > 1"
-            size="small"
-            icon="Delete"
-            type="danger"
-            circle
-            @click="removeRow(row.key)"
-          />
-            </el-col>
-          </el-row>
-        </div>
-
-        <AppButton size="large" type="default" icon="Plus" @click="addRow">
+        <!-- <AppButton size="large" type="primary" plain icon="Plus" @click="addRow">
           បន្ថែមមួយទៀត
-        </AppButton>
+        </AppButton> -->
 
-        <div class="create-actions">
+        <!-- <div class="create-actions">
           <AppButton type="primary" :loading="saving" @click="handleSave">
             រក្សាទុក
           </AppButton>
-        </div>
+        </div> -->
       </div>
     </AppDialog>
   </div>

@@ -1,8 +1,7 @@
 <template>
-  <div class="app-table" :style="{ '--brand-color': '#4589ce' }">
+  <div class="app-table" >
     <el-table
       v-if="!isMobile"
-      ref="tableRef"
       :data="data"
       v-loading="loading"
       stripe
@@ -16,9 +15,10 @@
         v-if="showIndex"
         type="index"
         :label="indexLabel"
-        width="70"
+        width="50"
+        align="center"
       />
-      <el-table-column v-if="expandable" type="expand" width="50">
+      <el-table-column v-if="expandable" type="expand" width="50" label="*">
         <template #default="scope">
           <slot name="expand" v-bind="scope" />
         </template>

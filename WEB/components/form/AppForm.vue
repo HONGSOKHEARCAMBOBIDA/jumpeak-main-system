@@ -9,7 +9,7 @@ const props = defineProps({
   labelWidth: { type: [String, Number], default: '120px' },
   labelPosition: { type: String, default: 'top' },
   submitText: { type: String, default: 'Submit' },
-  resetText: { type: String, default: 'Reset' },
+  resetText: { type: String, default: 'ចាកចេញ' },
   showActions: { type: Boolean, default: true },
 })
 const emit = defineEmits(['submit', 'reset'])
@@ -47,8 +47,8 @@ defineExpose({ validate: () => formRef.value?.validate(), resetFields: handleRes
     <slot />
 
     <div v-if="showActions" class="flex items-center gap-2 mt-2">
-      <app-button plain type="default" :loading="loading" @click="handleSubmit" size="default">{{ submitText }}</app-button>
-       <app-button plain type="default" :disabled="loading" @click="handleReset" size="default">{{ resetText }}</app-button>
+      <app-button  type="primary" :loading="loading" @click="handleSubmit" size="large">{{ submitText }}</app-button>
+       <app-button  type="warning" :disabled="loading" @click="handleReset" size="large">{{ resetText }}</app-button>
     </div>
   </el-form>
 </template>

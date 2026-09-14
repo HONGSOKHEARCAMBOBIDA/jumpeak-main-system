@@ -17,6 +17,7 @@ type PaymentStatus string
 const (
 	PaymentStatusCompleted PaymentStatus = "COMPLETED"
 	PaymentStatusVoided    PaymentStatus = "VOIDED"
+	PaymentStatusRefund    PaymentStatus = "REFUND"
 )
 
 type Payment struct {
@@ -32,7 +33,7 @@ type Payment struct {
 	Method             PaymentMethod `gorm:"type:enum('CASH','BANK','ABA','ACLEDA','OTHER');not null" json:"method"`
 	ReferenceNumber    *string       `gorm:"type:varchar(60)" json:"reference_number,omitempty"`
 	Note               *string       `gorm:"type:varchar(255)" json:"note,omitempty"`
-	Status             PaymentStatus `gorm:"type:enum('COMPLETED','VOIDED');not null;default:COMPLETED" json:"status"`
+	Status             PaymentStatus `gorm:"type:enum('COMPLETED','VOIDED','REFUND');not null;default:COMPLETED" json:"status"`
 	CreatedBy          *uint64       `gorm:"index" json:"created_by,omitempty"`
 	CreatedAt          time.Time     `gorm:"not null;autoCreateTime" json:"created_at"`
 	UpdatedAt          time.Time     `gorm:"not null;autoUpdateTime" json:"updated_at"`

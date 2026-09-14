@@ -126,7 +126,7 @@ func (s *productservice) Get(ctx context.Context, userID int, pf request.Paginat
 	`)
 
 	dataQuery = helper.CompanyFilter(dataQuery, s.db, user.Role, user)
-	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
+	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Order("id DESC").Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch product: %w", err)
 	}
 

@@ -163,6 +163,10 @@ func (s *paymentservice) Void(ctx context.Context, id int, userID int, input req
 			return apperror.New(apperror.CodeInvalidInput, "payment is already voided", nil)
 		}
 
+		if payment.Status == model.PaymentStatusRefund {
+			return apperror.New(apperror.CodeInvalidInput, "payment is already refudn", nil)
+		}
+
 		var allocations []model.PaymentAllocation
 		if err := tx.Where("payment_id = ?", payment.ID).Find(&allocations).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to fetch payment allocations", nil)

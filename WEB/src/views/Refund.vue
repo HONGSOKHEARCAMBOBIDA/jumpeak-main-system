@@ -44,7 +44,15 @@ const customerSearching = ref(false);
 async function searchCustomers(query) {
   customerSearching.value = true;
   try {
-    const res = await getcustomer({ page: 1, page_size: 20, name: query || "" });
+    const params = {
+      page: 1,
+      page_size: 20,
+    };
+
+    if (query.trim()) {
+      params.name = query.trim();
+    }    
+    const res = await getcustomer(params);
     customerOptions.value = (res.data.data || []).map((c) => ({
       label: `${c.name} (${c.customer_code})`,
       value: c.id,
@@ -67,15 +75,35 @@ async function loadCustomerPayments(customerId) {
   try {
     const res = await getpayment({ customer_id: customerId, status: "COMPLETED", page: 1, page_size: 50 });
     paymentOptions.value = (res.data.data || []).map((p) => ({
-      label: `${p.payment_number} — ${p.amount} ${p.currency_code}`,
+      label: `${p.payment_number} | ${p.amount} ${p.currency_code} | ${p.payment_date}`,
       value: p.id,
       raw: p,
     }));
+    console.log(paymentOptions.value)
   } catch (e) {
     notify.error(e?.response?.data?.error || "Failed to load payments");
   } finally {
     paymentsLoading.value = false;
   }
+}
+
+function paymentamount(id){
+  return paymentOptions.value.find((p)=> p.value === id)?.raw?.amount ?? 0;
+}
+
+function invoicepaid(id){
+  return paidInvoiceOptions.value.find((i) => i.value === id)?.raw?.paid_amount ?? 0;
+}
+
+function onInvoicePick(row){
+  const amount = invoicepaid(row.invoice_id)
+  row.amount = amount
+}
+
+function onPaymentPicked(id) {
+  const amount = paymentamount(id);
+  form.amount = amount
+
 }
 
 // --- invoices the customer has actually paid something on (refund targets) ---
@@ -90,7 +118,7 @@ async function loadPaidInvoices(customerId) {
     paidInvoiceOptions.value = (res.data.data || [])
       .filter((i) => i.paid_amount > 0)
       .map((i) => ({
-        label: `${i.invoice_number} — បានបង់ ${i.paid_amount}${i.currency_code}`,
+        label: `${i.invoice_number} — បានបង់ ${i.paid_amount}`,
         value: i.id,
         raw: i,
       }));
@@ -213,7 +241,6 @@ async function handleSave() {
 
 onMounted(() => {
   fetchRefunds();
-  searchCustomers("");
 });
 </script>
 
@@ -222,14 +249,12 @@ onMounted(() => {
     <AppFilterBar
       :fields="[
         { slot: 'customer', span: 8 },
-        { slot: 'create', span: 4 },
       ]"
     >
       <template #customer>
         <AppSelect
           v-model="filters.customer_id"
           :options="customerOptions"
-          label="អតិថិជន"
           placeholder="អតិថិជន"
           size="large"
           filterable
@@ -240,7 +265,7 @@ onMounted(() => {
           @change="fetchRefunds"
         />
       </template>
-      <template #create>
+      <template #actions>
         <AppButton
           v-if="canAddRefund"
           type="primary"
@@ -269,14 +294,17 @@ onMounted(() => {
           { slot: 'amount', label: 'ចំនួនត្រឡប់', width: 130 },
           { prop: 'reason', label: 'មូលហេតុ', minWidth: 160 },
           { prop: 'refunded_at', label: 'កាលបរិច្ឆេទ', width: 120 },
-          { prop: 'create_by', label: 'បង្កើតដោយ', width: 200 },
+          { slot: 'create_by', label: 'អ្នកត្រឡប់ប្រាក់', width: 200 },
         ]"
       >
         <template #amount="{ row }">
-          <el-text tag="b" type="danger">{{ row.amount }} <el-text size="small" type="primary">{{ row.currency }}</el-text></el-text>
+          <el-text tag="b" style="color: red;">{{ row.amount }} <el-text style="color: red;" size="small" >{{ row.currency }}</el-text></el-text>
         </template>
         <template #branch_Name="{row}">
           <el-text>{{ row.branch_Name }} | <el-text size="small" type="primary">{{ row.branch_Code }}</el-text></el-text>
+        </template>
+        <template #create_by="{row}">
+          <el-text style="color: red;" size="small">{{ row.create_by }}</el-text>
         </template>
       </AppTable>
     </el-card>
@@ -312,6 +340,7 @@ onMounted(() => {
           prop="payment_id"
           placeholder="ជ្រើសរើសការទូទាត់"
           :loading="paymentsLoading"
+          @change="onPaymentPicked(form.payment_id)"
         />
 
         <el-row :gutter="16">
@@ -329,8 +358,6 @@ onMounted(() => {
 
         <div class="item-rows">
           <div v-for="row in allocations" :key="row.key" class="item-row">
-            <el-row :gutter="10">
-              <el-col :span="16">
                 <AppSelect
                   v-model="row.invoice_id"
                   :options="paidInvoiceOptions"
@@ -338,14 +365,15 @@ onMounted(() => {
                   placeholder="ជ្រើសរើសវិក័យបត្រ"
                   :loading="invoicesLoading"
                   clearable
+                  @change="onInvoicePick(row)"
                 />
-              </el-col>
-              <el-col :span="6">
+            <el-row :gutter="20">
+               <el-col :span="20">
                 <AppInput v-model.number="row.amount" type="number" placeholder="ចំនួន" />
               </el-col>
               <el-col :span="2">
                 <AppButton
-                  v-if="allocations.length > 1"
+                  :disabled="allocations.length <= 1"
                   size="small"
                   icon="Delete"
                   type="danger"

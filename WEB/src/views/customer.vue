@@ -37,44 +37,51 @@ const formRef = ref();
 // filters
 const filters = reactive({
   name: "",
-  company_id:null,
-  branch_id:null
+  company_id: null,
+  branch_id: null,
 });
 
-const companyoptions = ref([])
-const branchoptions = ref([])
+const companyoptions = ref([]);
+const branchoptions = ref([]);
 async function fetchCompanyOptions() {
   try {
-    const res = await getcompanynopagitaion()
+    const res = await getcompanynopagitaion();
     companyoptions.value = (res.data.data || []).map((a) => ({
       label: a.name,
       value: a.id,
-    }))
+    }));
   } catch (e) {
-    notify.error(e?.response?.data?.message || e.message || 'Failed to load company')
+    notify.error(
+      e?.response?.data?.message || e.message || "Failed to load company",
+    );
   }
 }
 
 async function loadBranchOption(companyID) {
-  if(!companyID) return []
+  if (!companyID) return [];
   try {
-
-    const res = await getbranchnopagination(companyID)
+    const res = await getbranchnopagination(companyID);
     return (res.data.data || []).map((f) => ({
       label: f.name,
       value: f.id,
-    }))
+    }));
   } catch (e) {
-    notify.error(e?.response?.data?.message || e.message || 'Failed to load branch')
-    return []
+    notify.error(
+      e?.response?.data?.message || e.message || "Failed to load branch",
+    );
+    return [];
   }
 }
 
 const StatusOption = [
-  { label: "ACTIVE", value: "ACTIVE" },
-  { label: "INACTIVE", value: "INACTIVE" },
-  { label: "BLACKLISTED", value: "BLACKLISTED" },
+  { label: "សកម្ម", value: "ACTIVE" },
+  { label: "អសកម្ម", value: "INACTIVE" },
+  { label: "ក្នុងបញ្ជីខ្មៅ", value: "BLACKLISTED" },
 ];
+
+const getStatusLabel = (status) => {
+  return StatusOption.find((i) => i.value === status)?.label || status
+}
 
 const form = reactive({
   name: "",
@@ -104,11 +111,11 @@ async function fetchCustomers() {
     const params = {
       page: page.value,
       page_size: pageSize.value,
-    }
-    if(filters.name) params.name = filters.name
-    if(filters.company_id) params.company_id = filters.company_id
-    if(filters.branch_id) params.branch_id = filters.branch_id
-    const res = await getcustomer(params)
+    };
+    if (filters.name) params.name = filters.name;
+    if (filters.company_id) params.company_id = filters.company_id;
+    if (filters.branch_id) params.branch_id = filters.branch_id;
+    const res = await getcustomer(params);
     customers.value = res.data.data || [];
     total.value = res.data.pagination?.totalCount || 0;
   } catch (e) {
@@ -117,8 +124,6 @@ async function fetchCustomers() {
     loading.value = false;
   }
 }
-
-
 
 function openCreate() {
   isEdit.value = false;
@@ -196,7 +201,7 @@ watch(
     branchoptions.value = await loadBranchOption(newVal);
     page.value = 1;
     fetchCustomers();
-  }
+  },
 );
 
 watch(
@@ -204,7 +209,7 @@ watch(
   async () => {
     page.value = 1;
     fetchCustomers();
-  }
+  },
 );
 
 watch(
@@ -212,70 +217,66 @@ watch(
   async () => {
     page.value = 1;
     fetchCustomers();
-  }
+  },
 );
 
 onMounted(() => {
   fetchCustomers();
-  fetchCompanyOptions()
+  fetchCompanyOptions();
 });
 </script>
 
 <template>
   <div>
-      <AppFilterBar
+    <AppFilterBar
       :fields="[
-        {slot: 'name',span: 4},
-        {slot: 'company',span: 4},
-        {slot: 'branch',span: 4},
-        {slot: 'create',span: 4},
+        { slot: 'name', span: 4 },
+        { slot: 'company', span: 4 },
+        { slot: 'branch', span: 4 },
       ]"
-      >
-
+    >
       <template #name>
- <AppInput
-        v-model="filters.name"
-        placeholder="ស្វែងរកតាមឈ្មោះ"
-        clearable
-        size="small"
-      />
+        <AppInput
+          v-model="filters.name"
+          placeholder="ស្វែងរកតាមឈ្មោះ"
+          clearable
+          size="small"
+        />
       </template>
       <template #company>
-<AppSelect
-            v-model="filters.company_id"
-            :options="companyoptions"
-            size="large"
-            placeholder="ក្រុមហ៑ុន"
-            clearable
-          />
+        <AppSelect
+          v-model="filters.company_id"
+          :options="companyoptions"
+          size="large"
+          placeholder="ក្រុមហ៑ុន"
+          clearable
+        />
       </template>
       <template #branch>
-<AppSelect
-            v-model="filters.branch_id"
-            :options="branchoptions"
-              size="large"
-            placeholder="សាខា"
-            clearable
-          />
+        <AppSelect
+          v-model="filters.branch_id"
+          :options="branchoptions"
+          size="large"
+          placeholder="សាខា"
+          clearable
+        />
       </template>
-           <template #create>
-             <AppButton
-        v-if="canAddCustomer"
-        type="primary"
-        @click="openCreate"
-        :block="false"
-        size="large"
-      >
-        បន្ថែមអតិថិជន
-      </AppButton>
-           </template>
-
-      </AppFilterBar>
-     
-
+      <template #actions>
+        <AppButton
+          v-if="canAddCustomer"
+          type="primary"
+          @click="openCreate"
+          :block="false"
+          size="large"
+        >
+          បន្ថែមអតិថិជន
+        </AppButton>
+      </template>
+    </AppFilterBar>
 
     <el-card class="table-card">
       <AppTable
+        show-index
         :data="customers"
         :loading="loading"
         v-model:current-page="page"
@@ -289,35 +290,59 @@ onMounted(() => {
           { prop: 'company_name', label: 'ក្រុមហ៊ុន', minWidth: 120 },
           { slot: 'branch_name', label: 'សាខា', minWidth: 120 },
           { slot: 'credit_limit', label: 'កម្រិតឥណទាន', width: 130 },
-          { slot: 'current_outstanding', label: 'ជំពាក់បច្ចុប្បន្ន', width: 140 },
+          {
+            slot: 'current_outstanding',
+            label: 'ជំពាក់បច្ចុប្បន្ន',
+            width: 140,
+          },
           { label: 'ស្ថានភាព', slot: 'status', width: 120 },
           { label: 'ចំណាំ', prop: 'notes', width: 120 },
         ]"
       >
-      <template #name="{row}">
-        <el-text>{{ row.name }} | <el-text size="small" type="primary">{{ row.customer_code }}</el-text></el-text>
-      </template>
-      <template #branch_name="{row}">
-        <el-text>{{ row.branch_name }} | <el-text size="small" type="primary">{{ row.branch_code }}</el-text></el-text>
-      </template>
-      <template #credit_limit="{row}">
-        <el-text tag="b">{{ row.credit_limit }} <el-text size="small" type="primary">{{ row.company_currency }}</el-text></el-text>
-      </template>
-      <template #current_outstanding="{row}">
-        <el-text>{{ row.current_outstanding }} <el-text size="small" type="primary">{{ row.company_currency }}</el-text></el-text>
-      </template>
+        <template #name="{ row }">
+          <el-text
+            >{{ row.name }} |
+            <el-text size="small" type="primary">{{
+              row.customer_code
+            }}</el-text></el-text
+          >
+        </template>
+        <template #branch_name="{ row }">
+          <el-text
+            >{{ row.branch_name }} |
+            <el-text size="small" type="primary">{{
+              row.branch_code
+            }}</el-text></el-text
+          >
+        </template>
+        <template #credit_limit="{ row }">
+          <el-text tag="b" style="color: black;"
+            >{{ row.credit_limit }}
+            <el-text size="small" style="color: black;">{{
+              row.company_currency
+            }}</el-text></el-text
+          >
+        </template>
+        <template #current_outstanding="{ row }">
+          <el-text tag="b" style="color: red;"
+            >{{ row.current_outstanding }}
+            <el-text size="small" style="color: red;">{{
+              row.company_currency
+            }}</el-text></el-text
+          >
+        </template>
         <template #status="{ row }">
           <el-text
             :type="
               row.status === 'ACTIVE'
                 ? 'success'
                 : row.status === 'BLACKLISTED'
-                ? 'danger'
-                : 'info'
+                  ? 'danger'
+                  : 'info'
             "
             size="small"
           >
-            {{ row.status }}
+            {{ getStatusLabel(row.status) }}
           </el-text>
         </template>
 
@@ -350,19 +375,33 @@ onMounted(() => {
         @submit="handleSave"
         submitText="រក្សាទុក"
       >
+      <el-row :gutter="20">
+        <el-col :span="12">
         <AppInput
           v-model="form.name"
           label="ឈ្មោះអតិថិជន"
           prop="name"
           placeholder="បញ្ចូលឈ្មោះអតិថិជន"
         />
-
+        </el-col>
+        <el-col :span="12">
         <AppInput
           v-model="form.phone"
           label="ទូរស័ព្ទ"
           prop="phone"
           placeholder="បញ្ចូលលេខទូរស័ព្ទ"
         />
+        </el-col>
+      </el-row>
+
+        <AppInput
+          v-model.number="form.credit_limit"
+          label="អាចជំពាក់ត្រឹម"
+          prop="credit_limit"
+          type="number"
+          placeholder="បញ្ចូលលុយអាចជំពាក់"
+        />
+
 
         <AppInput
           v-model="form.address"
@@ -379,13 +418,7 @@ onMounted(() => {
           placeholder="បញ្ចូលកំណត់ចំណាំ"
         />
 
-        <AppInput
-          v-model.number="form.credit_limit"
-          label="កម្រិតឥណទាន"
-          prop="credit_limit"
-          type="number"
-          placeholder="បញ្ចូលកម្រិតឥណទាន"
-        />
+
 
         <template v-if="isEdit">
           <AppSelect

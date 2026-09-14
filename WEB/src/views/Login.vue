@@ -43,7 +43,7 @@
               type="primary"
               block="false"
             >
-              ចូលប្រព័ន្ធ
+              ចូល
             </AppButton>
           </el-form>
         </template>
@@ -120,49 +120,6 @@ async function handleLogin() {
   font-weight: 600;
 }
 
-.qr-scanner-wrap {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 0 16px;
-  min-height: 200px;
-}
-
-.qr-start,
-.qr-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 24px 0;
-}
-
-.qr-viewport {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-}
-
-#qr-reader {
-  width: 100% !important;
-  max-width: 280px;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #409eff;
-}
-
-#qr-reader__scan_region img,
-#qr-reader__dashboard {
-  display: none !important;
-}
-
-.qr-hint {
-  color: #888;
-  font-size: 13px;
-  margin: 10px 0 0;
-  text-align: center;
-}
 
 @media (max-width: 768px) {
   .login-page {
@@ -173,7 +130,7 @@ async function handleLogin() {
     width: 100%;
     max-width: 420px;
     padding: 24px 20px;
-    border-radius: 25px;
+    border-radius: 2px;
   }
 }
 </style>

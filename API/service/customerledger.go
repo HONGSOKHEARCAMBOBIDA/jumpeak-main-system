@@ -95,7 +95,7 @@ func (s *customerledgerservice) Get(ctx context.Context, userID int, pf request.
 	dataQuery = helper.ApplyAccessFilter(dataQuery, s.db, user.Role, user)
 	// Chronological order (oldest first) so the running balance reads top-to-bottom
 	// like a statement of account; reverse in the UI if a "latest first" view is wanted.
-	if err := dataQuery.Order("l.entry_date ASC").Order("l.id ASC").Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
+	if err := dataQuery.Offset(offset).Limit(pf.PageSize).Scan(&data).Error; err != nil {
 		return nil, nil, fmt.Errorf("fetch customer ledger: %w", err)
 	}
 

@@ -132,6 +132,19 @@ func (s *refundservice) Create(ctx context.Context, userID int, input request.Re
 			Update("current_outstanding", gorm.Expr("current_outstanding + ?", input.Amount)).Error; err != nil {
 			return apperror.New(apperror.CodeInternal, "failed to update customer balance", nil)
 		}
+		note := fmt.Sprintf("បានសងប្រាក់វិញ %.2f", input.Amount)
+		if err := tx.Model(&model.Payment{}).
+			Where("id = ?", input.PaymentID).
+			Updates(map[string]interface{}{
+				"status": model.PaymentStatusRefund,
+				"note":   note,
+			}).Error; err != nil {
+			return apperror.New(
+				apperror.CodeInternal,
+				"failed to update payment status and note",
+				nil,
+			)
+		}
 
 		return nil
 	})

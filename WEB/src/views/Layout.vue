@@ -52,6 +52,7 @@
         <el-dropdown @command="handleCommand">
           <div class="avatar-row">
             <el-avatar
+              
               :size="32"
               style="background: #409eff"
             >

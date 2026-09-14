@@ -43,6 +43,7 @@ const filters = reactive({
 const StatusOption = [
   { label: "បង់រួចរាល់", value: "COMPLETED" },
   { label: "បានលុបចោល", value: "VOIDED" },
+  { label: "សងប្រាក់វិញ", value: "REFUND" }
 ];
 
 const getStatusLabel = (status) => {
@@ -67,7 +68,15 @@ const customerSearching = ref(false);
 async function searchCustomers(query) {
   customerSearching.value = true;
   try {
-    const res = await getcustomer({ page: 1, page_size: 20, name: query || "" });
+    const params = {
+      page: 1,
+      page_size: 20,
+    };
+
+    if (query.trim()) {
+      params.name = query.trim();
+    }    
+    const res = await getcustomer(params);
     customerOptions.value = (res.data.data || []).map((c) => ({
       label: `${c.name} (${c.customer_code})`,
       value: c.id,
@@ -83,6 +92,7 @@ async function searchCustomers(query) {
 // --- outstanding invoices for the picked customer (allocation targets) ---
 const openInvoiceOptions = ref([]);
 const invoicesLoading = ref(false);
+const outstanding = ref(null)
 async function loadOpenInvoices(customerId) {
   openInvoiceOptions.value = [];
   if (!customerId) return;
@@ -92,7 +102,7 @@ async function loadOpenInvoices(customerId) {
     openInvoiceOptions.value = (res.data.data || [])
       .filter((i) => i.outstanding_amount > 0)
       .map((i) => ({
-        label: `${i.invoice_number} — នៅជំពាក់ ${i.outstanding_amount}${i.currency_code}`,
+        label: `នៅជំពាក់ ${i.outstanding_amount}${i.currency_code}`,
         value: i.id,
         raw: i,
       }));
@@ -149,6 +159,12 @@ async function onCustomerPickedInForm(customerId) {
   await loadOpenInvoices(customerId);
 }
 
+function onInvoicePicked(row) {
+  const outstanding = invoiceOutstanding(row.invoice_id);
+  row.amount = outstanding;
+  form.amount = outstanding
+}
+
 const canAddPayment = computed(() =>
   userDataStore.permissions?.some((p) => p.name === "add.Payment"),
 );
@@ -184,7 +200,7 @@ function openCreate() {
   form.note = "";
   allocations.value = [blankAllocation()];
   openInvoiceOptions.value = [];
-  searchCustomers("");
+ // searchCustomers("");
   dialogVisible.value = true;
 }
 
@@ -256,7 +272,6 @@ async function confirmVoid() {
 
 onMounted(() => {
   fetchPayments();
-  searchCustomers("");
 });
 </script>
 
@@ -267,7 +282,6 @@ onMounted(() => {
         { slot: 'customer', span: 6 },
         { slot: 'status', span: 5 },
         { slot: 'method', span: 5 },
-        { slot: 'create', span: 4 },
       ]"
     >
       <template #customer>
@@ -304,7 +318,7 @@ onMounted(() => {
           @change="fetchPayments"
         />
       </template>
-      <template #create>
+      <template #actions>
         <AppButton
           v-if="canAddPayment"
           type="primary"
@@ -413,34 +427,44 @@ onMounted(() => {
           </el-col>
         </el-row>
 
-        <AppInput v-model="form.reference_number" label="លេខយោង" placeholder="លេខយោង (ស្រេចចិត្ត)" />
-        <AppInput v-model="form.note" label="ចំណាំ" type="textarea" placeholder="ចំណាំ (ស្រេចចិត្ត)" />
+        <el-row :gutter="20">
+          <el-col :span="12">
+<AppInput v-model="form.reference_number" label="លេខយោង" placeholder="លេខយោង (ស្រេចចិត្ត)" />
+          </el-col>
+          <el-col :span="12">
+        <AppInput v-model="form.note" label="ចំណាំ" placeholder="ចំណាំ (ស្រេចចិត្ត)" />
+          </el-col>
+        </el-row>
+
+        
+
 
         <el-divider content-position="left">បែងចែកទៅលើវិក័យបត្រ</el-divider>
 
         <div class="item-rows">
           <div v-for="row in allocations" :key="row.key" class="item-row">
-            <el-row :gutter="10">
+            <el-row :gutter="10" align="middle">
               <el-col :span="14">
                 <AppSelect
                   v-model="row.invoice_id"
                   :options="openInvoiceOptions"
-                  label="លេខវិក័យបត្រ"
+                  label="វិក័យបត្រ"
                   placeholder="ជ្រើសរើសវិក័យបត្រ"
                   size="large"
                   :loading="invoicesLoading"
                   clearable
+                  @change="onInvoicePicked(row)"
                 />
               </el-col>
-              <el-col :span="6">
-                <AppInput v-model.number="row.amount" type="number" placeholder="ចំនួនប្រាក់សង" label="ចំនួនប្រាក់សង" />
+              <el-col :span="7">
+                <AppInput v-model.number="row.amount" type="number" placeholder="សង" label="សង" />
               </el-col>
-              <el-col :span="2" class="item-subtotal">
+              <!-- <el-col :span="2" class="item-subtotal">
                 {{ invoiceOutstanding(row.invoice_id) }} 
-              </el-col>
+              </el-col> -->
               <el-col :span="2">
                 <AppButton
-                  v-if="allocations.length > 1"
+                  :disabled="allocations.length <= 1"
                   size="small"
                   icon="Delete"
                   type="danger"

@@ -11,7 +11,7 @@
       >
         <slot :name="field.slot" />
       </el-col>
-      <el-col :xs="24" :sm="24" :md="actionSpan" class="filter-actions">
+      <el-col :xs="24" :sm="12" :md="actionSpan" class="filter-actions">
         <slot name="actions" />
       </el-col>
     </el-row>
@@ -39,8 +39,6 @@ const normalizedFields = computed(() => props.fields)
 }
 
 .filter-actions {
-  display: flex;
-  align-items: center;
   justify-content: flex-end;
 }
 
@@ -50,6 +48,12 @@ const normalizedFields = computed(() => props.fields)
   }
   .filter-actions :deep(.el-button) {
     width: 100%;
+  }
+  .filter-row{
+    row-gap: 1px;
+  }
+  .filter-card{
+    margin-bottom: 5px;
   }
 }
 </style>
