@@ -8,7 +8,7 @@ const props = defineProps({
   disabled: { type: Boolean, default: false },
   labelWidth: { type: [String, Number], default: '120px' },
   labelPosition: { type: String, default: 'top' },
-  submitText: { type: String, default: 'Submit' },
+  submitText: { type: String, default: 'រក្សាទុក' },
   resetText: { type: String, default: 'ចាកចេញ' },
   showActions: { type: Boolean, default: true },
 })

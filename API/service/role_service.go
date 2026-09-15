@@ -87,8 +87,7 @@ func (s *roleservice) GetRolePermission(ctx context.Context, id int, userID int,
 	base := func() *gorm.DB {
 		return s.db.WithContext(ctx).
 			Table("permission p").
-			Joins("LEFT JOIN role_permission rp ON p.id = rp.permission_id").
-			Where("rp.role_id = ?", id)
+			Joins("LEFT JOIN role_permission rp ON rp.permission_id = p.id AND rp.role_id =?", id)
 	}
 
 	if err := base().Count(&total).Error; err != nil {

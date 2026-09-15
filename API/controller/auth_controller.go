@@ -22,6 +22,24 @@ func NewAuthController() AuthController {
 	}
 }
 
+func (cr *AuthController) ChangePassword(c *gin.Context) {
+	userID, ok := helper.GetUserID(c)
+	if !ok {
+		share.ResponseError(c, http.StatusUnauthorized, "please login")
+		return
+	}
+	var input request.NewPasswordRequest
+	if err := c.ShouldBindJSON(&input); err != nil {
+		share.ResponseError(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	if err := cr.service.ChangePassword(c, userID, input); err != nil {
+		share.ResponseError(c, http.StatusInternalServerError, err.Error())
+		return
+	}
+	share.ResponseSuccess(c, http.StatusOK, "password changed")
+}
+
 func (cr *AuthController) Login(c *gin.Context) {
 	var input request.AuthRequest
 	if err := c.ShouldBindJSON(&input); err != nil {

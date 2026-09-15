@@ -31,6 +31,7 @@ type AuthService interface {
 	GetRole(ctx context.Context, id int) ([]model.Role, error)
 	Create(ctx context.Context, input request.UserRequestCreate) error
 	Update(ctx context.Context, id int, input request.UserRequestUpdate) error
+	ChangePassword(ctx context.Context, userID int, input request.NewPasswordRequest) error
 }
 
 type authservice struct {
@@ -62,6 +63,20 @@ var requiredPermissions = []string{
 	"Void.Payment",
 	"add.Refund",
 	"add.DebAdjustment",
+}
+
+func (s *authservice) ChangePassword(ctx context.Context, userID int, input request.NewPasswordRequest) error {
+	var user model.User
+	if err := s.db.WithContext(ctx).First(&user, userID).Error; err != nil {
+		return err
+	}
+
+	hash := utils.HasPassword(input.NewPassword)
+	if err := s.db.WithContext(ctx).Model(&user).Update("password_hash", hash).Error; err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (s *authservice) GetRole(ctx context.Context, id int) ([]model.Role, error) {

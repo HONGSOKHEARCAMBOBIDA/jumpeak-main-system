@@ -54,6 +54,7 @@ func SetupRoutes(r *gin.Engine) {
 		// User
 		auth.POST(route.AddUser, middleware.PermissionMiddleware(permission.AddUser), authcontroller.Create)
 		auth.PUT(route.EditUser, middleware.PermissionMiddleware(permission.EditUser), authcontroller.Update)
+		auth.PUT(route.ChangePassword, middleware.PermissionMiddleware(permission.ChangePassword), authcontroller.ChangePassword)
 
 		// Customer
 		auth.POST(route.AddCustomer, middleware.PermissionMiddleware(permission.AddCustomer), customercontroller.Create)

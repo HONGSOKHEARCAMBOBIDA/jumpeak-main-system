@@ -123,4 +123,8 @@ var Permissions = []model.Permission{
 		Name:        "view.Report",
 		DisplayName: "view.Report",
 	},
+	{
+		Name:        "change.password",
+		DisplayName: "change.password",
+	},
 }

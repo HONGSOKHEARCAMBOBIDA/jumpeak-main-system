@@ -12,6 +12,7 @@ import {
   addrolehaspermission,
   editrole,
 } from "../api/services.js";
+import AppFilterBar from "../../components/AppFilterBar.vue";
 
 const role = ref([]);
 const rolehaspermission = ref([]);
@@ -25,7 +26,9 @@ const isAddMode = ref(false);
 const selectroleID = ref(null);
 const total = ref(0);
 const searchKeyword = ref("");
-
+const filters = reactive({
+  name: "",
+});
 const page = ref(1);
 const pageSize = ref(10);
 
@@ -159,17 +162,25 @@ onMounted(() => {
 
 <template>
   <div class="role-page">
-    <!-- ក្បាលទំព័រ + កម្មវិធីស្វែងរក -->
-    <div class="page-header">
-      <h2 class="page-title">គ្រប់គ្រងតួនាទី</h2>
-      <AppInput
-        v-model="searchKeyword"
-        placeholder="ស្វែងរកតួនាទី..."
-        clearable
-        prefix-icon="Search"
-        style="width: 260px"
-      />
-    </div>
+    <AppFilterBar
+    :fields="[
+      {slot: 'name',span: 4},
+      {slot: 'search',span:4}
+    ]"
+    >
+    <template #name>
+       <h2 class="page-title">គ្រប់គ្រងតួនាទី</h2>
+    </template>
+    <template #search>
+       <AppInput
+          v-model="filters.name"
+          placeholder="ស្វែងរកតាមឈ្មោះ"
+          clearable
+          size="small"
+        />
+    </template>
+    </AppFilterBar>
+    
 
     <AppTable
       :data="filteredRoles"
@@ -193,8 +204,8 @@ onMounted(() => {
         <el-tooltip content="គ្រប់គ្រងសិទ្ធិ" placement="top">
           <AppButton
             size="small"
-            type="info"
-            icon="Key"
+            type="danger"
+            icon="Lock"
             circle
             @click="openPermissionDialog(row)"
           />
@@ -206,7 +217,7 @@ onMounted(() => {
     <AppDialog
       v-model="dialogVisible"
       title="គ្រប់គ្រងសិទ្ធិ"
-      width="700px"
+      width="50%"
     >
       <p class="dialog-subtitle">
         បិទ/បើក ដើម្បីផ្តល់ ឬដកសិទ្ធិចេញពីតួនាទីនេះ

@@ -280,6 +280,7 @@ onMounted(() => {
 
     <el-card class="table-card">
       <AppTable
+        show-index
         :data="refunds"
         :loading="loading"
         v-model:current-page="page"
